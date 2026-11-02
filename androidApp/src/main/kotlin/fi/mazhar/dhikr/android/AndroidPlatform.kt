@@ -37,18 +37,23 @@ class AndroidPlatform(private val context: Context) : AppPlatform {
 
     override fun version(): String = BuildConfig.VERSION_NAME
 
+    /** Best-effort: haptics must never crash a count (requires the VIBRATE permission). */
     override fun vibrate(strong: Boolean) {
         val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator ?: return
         if (!vibrator.hasVibrator()) return
-        if (Build.VERSION.SDK_INT >= 26) {
-            if (strong) {
-                vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 45, 70, 85), -1))
+        try {
+            if (Build.VERSION.SDK_INT >= 26) {
+                if (strong) {
+                    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 45, 70, 85), -1))
+                } else {
+                    vibrator.vibrate(VibrationEffect.createOneShot(18, VibrationEffect.DEFAULT_AMPLITUDE))
+                }
             } else {
-                vibrator.vibrate(VibrationEffect.createOneShot(18, VibrationEffect.DEFAULT_AMPLITUDE))
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(if (strong) 110L else 20L)
             }
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(if (strong) 110L else 20L)
+        } catch (_: RuntimeException) {
+            // e.g. SecurityException on devices that restrict the vibrator.
         }
     }
 

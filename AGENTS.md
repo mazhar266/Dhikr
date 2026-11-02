@@ -28,6 +28,7 @@ Kotlin Multiplatform app (Dhikr). Four Gradle modules (root `build.gradle.kts` l
 - **`shared/` must stay dependency-free and platform-neutral.** No `String.format` / `java.time` in its commonMain (they don't exist on JS/Wasm; use `DayKeys`-style helpers). On wasmJs, JS interop uses `@kotlin.JsFun("...")` on `external fun`s. `composeUi/` has no JS targets, so it may use `java.io`/`java.text` in commonMain.
 - **Expect classes consumed by other KMP modules**: `expect class SystemClock() : Clock` must declare its interface members (`override fun ...`) in the header, and actuals mark them `actual override` — otherwise `:shared:compileCommonMainKotlinMetadata` fails once another multiplatform module (composeUi) consumes shared.
 - **Qur'an text is generated, never hand-edited**: run `python tools/gen_quran_kt.py` (env `QURAN_JSON_DIR` pointing at quran.com API JSON dumps) to regenerate `shared/.../content/QuranTexts.kt`; `ContentTest` asserts FNV-1a fingerprints against the verified dataset.
+- **App icons are generated from `icon.png`** (repo root, the master artwork): run `python tools/gen_icons.py` (needs Pillow) to rewrite the Android mipmaps/adaptive icon and `desktopApp/icons/dhikr.ico` + window icon. Don't hand-edit the outputs.
 - Release signing never gets committed: `keystore.properties` and `keystore/` are gitignored; back the keystore up — losing it means the app can never be updated under the same signing key.
 
 ## Verification order
