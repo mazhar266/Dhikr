@@ -2,6 +2,7 @@ package fi.mazhar.dhikr.content
 
 import fi.mazhar.dhikr.RoutineEntry
 import fi.mazhar.dhikr.RoutineId
+import fi.mazhar.dhikr.TranslationLanguage
 
 /**
  * The six bundled routines. Entry order, repetition targets, and prayer
@@ -13,10 +14,18 @@ import fi.mazhar.dhikr.RoutineId
 data class RoutineDefinition(
     val id: RoutineId,
     val title: String,
+    val titleBn: String,
     val arabicTitle: String,
     val description: String,
+    val descriptionBn: String,
     val entries: List<RoutineEntry>,
-)
+) {
+    fun titleFor(language: TranslationLanguage): String =
+        if (language == TranslationLanguage.BENGALI) titleBn else title
+
+    fun descriptionFor(language: TranslationLanguage): String =
+        if (language == TranslationLanguage.BENGALI) descriptionBn else description
+}
 
 object Routines {
 
@@ -77,12 +86,20 @@ object Routines {
             fajrEntries.drop(24).dropLast(1)
                 .map { it.copy(key = fi.mazhar.dhikr.RoutineKey(RoutineId.ASR, it.key.order)) }
 
-    private fun shortRoutine(id: RoutineId, title: String, arabicTitle: String, description: String) =
-        RoutineDefinition(
+    private fun shortRoutine(
+        id: RoutineId,
+        title: String,
+        titleBn: String,
+        arabicTitle: String,
+        description: String,
+        descriptionBn: String,
+    ) = RoutineDefinition(
             id = id,
             title = title,
+            titleBn = titleBn,
             arabicTitle = arabicTitle,
             description = description,
+            descriptionBn = descriptionBn,
             entries = listOf(
                 entry(id, 1, "quran-ayatul-kursi", 1),
                 entry(id, 2, "subhanallah", 33),
@@ -96,25 +113,31 @@ object Routines {
         RoutineDefinition(
             id = RoutineId.FAJR,
             title = "Fajr",
+            titleBn = "ফজর",
             arabicTitle = "الْفَجْر",
             description = "Morning adhkar after the Fajr prayer",
+            descriptionBn = "ফজরের নামাযের পর সকালের আযকার",
             entries = fajrEntries,
         ),
-        shortRoutine(RoutineId.DHUHR, "Dhuhr", "الظُّهْر", "Adhkar after the Dhuhr prayer"),
+        shortRoutine(RoutineId.DHUHR, "Dhuhr", "যোহর", "الظُّهْر", "Adhkar after the Dhuhr prayer", "যোহরের নামাযের পরের আযকার"),
         RoutineDefinition(
             id = RoutineId.ASR,
             title = "Asr",
+            titleBn = "আসর",
             arabicTitle = "الْعَصْر",
             description = "Afternoon adhkar after the Asr prayer",
+            descriptionBn = "আসরের নামাযের পর বিকেলের আযকার",
             entries = asrEntries,
         ),
-        shortRoutine(RoutineId.MAGHRIB, "Maghrib", "الْمَغْرِب", "Adhkar after the Maghrib prayer"),
-        shortRoutine(RoutineId.ISHA, "Isha", "الْعِشَاء", "Adhkar after the Isha prayer"),
+        shortRoutine(RoutineId.MAGHRIB, "Maghrib", "মাগরিব", "الْمَغْرِب", "Adhkar after the Maghrib prayer", "মাগরিবের নামাযের পরের আযকার"),
+        shortRoutine(RoutineId.ISHA, "Isha", "এশা", "الْعِشَاء", "Adhkar after the Isha prayer", "এশার নামাযের পরের আযকার"),
         RoutineDefinition(
             id = RoutineId.BEFORE_SLEEP,
             title = "Before Sleep",
+            titleBn = "ঘুমানোর আগে",
             arabicTitle = "قَبْلَ النَّوْم",
             description = "The sleeping adhkar",
+            descriptionBn = "ঘুমানোর আযকার",
             entries = listOf(
                 entry(RoutineId.BEFORE_SLEEP, 1, "quran-ayatul-kursi", 1),
                 entry(RoutineId.BEFORE_SLEEP, 2, "quran-baqarah-285-286", 1),

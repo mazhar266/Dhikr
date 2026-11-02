@@ -18,37 +18,39 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import fi.mazhar.dhikr.titleFor
 
 @Composable
 fun DhikrApp(model: AppModel) {
     DhikrAppTheme(model.state.settings) {
+        val text = uiText(model.state.settings.translationLanguage)
         val showBottomBar = when (model.screen) {
             is Screen.Home, is Screen.Summary, is Screen.Settings -> true
             else -> false
         }
 
         Scaffold(
-            topBar = { topBar(model) },
+            topBar = { topBar(model, text) },
             bottomBar = {
                 if (showBottomBar) {
                     NavigationBar {
                         NavigationBarItem(
                             selected = model.screen is Screen.Home,
                             onClick = { model.goHome() },
-                            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-                            label = { Text("Today") },
+                            icon = { Icon(Icons.Filled.Home, contentDescription = text.home) },
+                            label = { Text(text.today) },
                         )
                         NavigationBarItem(
                             selected = model.screen is Screen.Summary,
                             onClick = { model.open(Screen.Summary) },
-                            icon = { Icon(Icons.Filled.BarChart, contentDescription = "Summary") },
-                            label = { Text("Summary") },
+                            icon = { Icon(Icons.Filled.BarChart, contentDescription = text.summary) },
+                            label = { Text(text.summary) },
                         )
                         NavigationBarItem(
                             selected = model.screen is Screen.Settings,
                             onClick = { model.open(Screen.Settings) },
-                            icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
-                            label = { Text("Settings") },
+                            icon = { Icon(Icons.Filled.Settings, contentDescription = text.settings) },
+                            label = { Text(text.settings) },
                         )
                     }
                 }
@@ -68,20 +70,21 @@ fun DhikrApp(model: AppModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun topBar(model: AppModel) {
+private fun topBar(model: AppModel, text: UiText) {
+    val language = model.state.settings.translationLanguage
     val title: String = when (val s = model.screen) {
         is Screen.Home -> "Dhikr"
-        is Screen.Summary -> "Daily Summary"
-        is Screen.Settings -> "Settings"
+        is Screen.Summary -> text.dailySummary
+        is Screen.Settings -> text.settings
         is Screen.Routine -> model.routineState(s.id)?.title ?: s.id.name
-        is Screen.Reader -> model.entry(s.id, s.order)?.dhikr?.title ?: ""
+        is Screen.Reader -> model.entry(s.id, s.order)?.dhikr?.titleFor(language) ?: ""
     }
     TopAppBar(
         title = { Text(title) },
         navigationIcon = {
             if (model.screen !is Screen.Home || model.canGoBack()) {
                 IconButton(onClick = { model.back() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = text.back)
                 }
             }
         },

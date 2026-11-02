@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import fi.mazhar.dhikr.ui.AppModel
 import fi.mazhar.dhikr.ui.AppPlatform
+import fi.mazhar.dhikr.ui.uiText
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -59,6 +60,7 @@ class AndroidPlatform(private val context: Context) : AppPlatform {
 
     @Composable
     override fun BackupSection(model: AppModel, onMessage: (String) -> Unit) {
+        val ui = uiText(model.state.settings.translationLanguage)
         val exportLauncher = rememberLauncherForActivityResult(
             ActivityResultContracts.CreateDocument("text/plain"),
         ) { uri: Uri? ->
@@ -67,9 +69,9 @@ class AndroidPlatform(private val context: Context) : AppPlatform {
                     context.contentResolver.openOutputStream(uri)?.use { out ->
                         out.write(model.export().toByteArray(Charsets.UTF_8))
                     }
-                    onMessage("Backup saved")
+                    onMessage(ui.backupSaved)
                 } catch (e: Exception) {
-                    onMessage("Backup failed: ${e.message}")
+                    onMessage(ui.backupFailed(e.message))
                 }
             }
         }
@@ -83,9 +85,9 @@ class AndroidPlatform(private val context: Context) : AppPlatform {
                         input.readBytes().toString(Charsets.UTF_8)
                     }
                     val ok = text != null && model.restore(text)
-                    onMessage(if (ok) "Backup restored" else "Not a valid Dhikr backup")
+                    onMessage(if (ok) ui.backupRestored else ui.backupInvalid)
                 } catch (e: Exception) {
-                    onMessage("Restore failed: ${e.message}")
+                    onMessage(ui.restoreFailed(e.message))
                 }
             }
         }
@@ -93,10 +95,10 @@ class AndroidPlatform(private val context: Context) : AppPlatform {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = {
                 exportLauncher.launch("dhikr-backup-${model.todayKey()}.txt")
-            }) { Text("Export…") }
+            }) { Text(ui.export) }
             TextButton(onClick = {
                 importLauncher.launch(arrayOf("text/plain", "text/*", "*/*"))
-            }) { Text("Import…") }
+            }) { Text(ui.import) }
         }
     }
 }

@@ -7,7 +7,8 @@ No account, no internet, no ads.
 ## Features
 
 - **Six routines** following a personal daily inventory (29 entries for Fajr, 28 for Asr, 5 each for Dhuhr/Maghrib/Isha and Before Sleep)
-- **Distraction-free reader** with large scalable Arabic, optional transliteration/translation, sources, and a one-hand counter with haptics and undo
+- **Distraction-free reader** with large scalable Arabic, pronunciation (Latin or বাংলা), translation in English or Bangla, sources, and a one-hand counter with haptics and undo
+- **Bangla**: Settings → Language switches the app, the meaning, and the pronunciation
 - **Persistent local progress** that resets at local midnight and keeps history; streaks and a 14-day overview
 - **Shared daily goal** for the "La ilaha illallah" 10×/100× tasbih (Fajr ↔ Asr), or fully independent counting
 - **Four themes**: Light, Sofia Paper (warm parchment), Dark (navy), and OLED (true black)

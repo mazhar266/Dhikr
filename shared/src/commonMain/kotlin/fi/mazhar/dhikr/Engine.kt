@@ -113,11 +113,12 @@ object DhikrEngine {
 
     fun routineState(state: SavedState, routineId: RoutineId, dayKey: String): RoutineUiState? {
         val routine = Routines.byId(routineId) ?: return null
+        val language = state.settings.translationLanguage
         return RoutineUiState(
             id = routine.id,
-            title = routine.title,
+            title = routine.titleFor(language),
             arabicTitle = routine.arabicTitle,
-            description = routine.description,
+            description = routine.descriptionFor(language),
             entries = entryState(state, routine, dayKey),
         )
     }

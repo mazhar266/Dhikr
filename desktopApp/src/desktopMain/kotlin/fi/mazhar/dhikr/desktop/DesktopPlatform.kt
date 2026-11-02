@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import fi.mazhar.dhikr.ui.AppModel
 import fi.mazhar.dhikr.ui.AppPlatform
+import fi.mazhar.dhikr.ui.uiText
 import java.io.File
 import java.text.SimpleDateFormat
 import java.time.format.DateTimeFormatter
@@ -42,31 +43,32 @@ object DesktopPlatform : AppPlatform {
 
     @Composable
     override fun BackupSection(model: AppModel, onMessage: (String) -> Unit) {
+        val ui = uiText(model.state.settings.translationLanguage)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = {
                 chooseFile(save = true) { path ->
                     if (path != null) {
                         try {
                             File(path).writeText(model.export(), Charsets.UTF_8)
-                            onMessage("Backup saved")
+                            onMessage(ui.backupSaved)
                         } catch (e: Exception) {
-                            onMessage("Backup failed: ${e.message}")
+                            onMessage(ui.backupFailed(e.message))
                         }
                     }
                 }
-            }) { Text("Export…") }
+            }) { Text(ui.export) }
             TextButton(onClick = {
                 chooseFile(save = false) { path ->
                     if (path != null) {
                         try {
                             val ok = model.restore(File(path).readText(Charsets.UTF_8))
-                            onMessage(if (ok) "Backup restored" else "Not a valid Dhikr backup")
+                            onMessage(if (ok) ui.backupRestored else ui.backupInvalid)
                         } catch (e: Exception) {
-                            onMessage("Restore failed: ${e.message}")
+                            onMessage(ui.restoreFailed(e.message))
                         }
                     }
                 }
-            }) { Text("Import…") }
+            }) { Text(ui.import) }
         }
     }
 

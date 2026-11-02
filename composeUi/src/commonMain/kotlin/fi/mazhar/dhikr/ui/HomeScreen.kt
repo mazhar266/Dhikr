@@ -34,6 +34,7 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
     val resume = model.resumeCandidate()
     val streak = model.streak()
     val platform = LocalAppPlatform.current
+    val text = uiText(model.state.settings.translationLanguage)
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -43,7 +44,7 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
         item {
             Column {
                 Text(
-                    "As-salamu alaykum",
+                    text.greeting,
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
@@ -71,7 +72,7 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text("Today's adhkar", style = MaterialTheme.typography.titleMedium)
+                        Text(text.todaysAdhkar, style = MaterialTheme.typography.titleMedium)
                         Text(
                             percentText(summary.overallPercent),
                             style = MaterialTheme.typography.titleMedium,
@@ -85,9 +86,12 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "${summary.completedEntries} of ${summary.totalEntries} entries · " +
-                            "${summary.totalRepetitions} repetitions" +
-                            if (streak > 0) " · $streak-day streak" else "",
+                        text.homeProgress(
+                            summary.completedEntries,
+                            summary.totalEntries,
+                            summary.totalRepetitions,
+                            streak,
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -113,12 +117,12 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
                         ) {
                             Column(Modifier.weight(1f)) {
                                 Text(
-                                    "Continue ${routine.title}",
+                                    text.continueRoutine(routine.title),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 )
                                 Text(
-                                    "${routine.completedEntries} of ${routine.totalEntries} entries done",
+                                    text.entriesDone(routine.completedEntries, routine.totalEntries),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 )
@@ -135,7 +139,7 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
         }
 
         items(summary.routines, key = { it.id.name }) { routine ->
-            RoutineCard(routine) { model.openRoutine(routine.id) }
+            RoutineCard(routine, text) { model.openRoutine(routine.id) }
         }
 
         item {
@@ -145,7 +149,7 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun RoutineCard(routine: RoutineUiState, onClick: () -> Unit) {
+private fun RoutineCard(routine: RoutineUiState, text: UiText, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -175,8 +179,11 @@ private fun RoutineCard(routine: RoutineUiState, onClick: () -> Unit) {
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    "${routine.completedEntries} / ${routine.totalEntries} entries · " +
+                    text.entryCount(
+                        routine.completedEntries,
+                        routine.totalEntries,
                         percentText(routine.percent),
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -185,7 +192,7 @@ private fun RoutineCard(routine: RoutineUiState, onClick: () -> Unit) {
             if (routine.complete) {
                 Icon(
                     Icons.Filled.CheckCircle,
-                    contentDescription = "Complete",
+                    contentDescription = text.complete,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(28.dp),
                 )

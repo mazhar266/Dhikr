@@ -79,16 +79,20 @@ and must not be presented as authenticated Sunnah.
   is displayed as *satisfied via the shared goal* and its count cannot be undone from Asr.
 - **Dhuhr / Maghrib / Isha (5 items each)** and **Before Sleep (5 items)**: placements verified as
   noted in the tables above.
-- **Bengali translations**: not included anywhere in the catalog. The data model and language
-  setting support them (`bengali` field, UI falls back to English with an explanatory note), but no
-  unverified Bengali text was invented. Requires a verified Bengali source.
+- **Bangla**: every catalog entry has a Bengali title, a Bengali-script pronunciation
+  (উচ্চারণ), and a meaning that follows the Arabic already in the catalog. Latin pronunciation
+  is the full transliteration (Qur'an passages are no longer ellipsized). The Settings language
+  switch selects English or বাংলা for the app chrome, the meaning, and the pronunciation.
+  Bangla text is a reading aid for the cited Arabic; it is not an independent isnad.
 
 ## Corrections requiring human scholarly review
 
 1. Confirm the intended wording of `takbir-tahlil-after-salam` (see above).
 2. Optionally review the gradings quoted from al-Albani for Abu Dawud 5079 (`ajirni-minan-nar`) and
    Abu Dawud 5055 (`quran-kafirun` placement), where scholars differ.
-3. Supply verified Bengali translations before enabling the Bengali language option.
+3. Bangla meanings and pronunciations follow the catalog Arabic. A reviewer who wants a
+   published Bengali tafsir wording can still compare them; they are not presented as a
+   separate authenticated source.
 
 ## Intentional simplifications (non-content)
 

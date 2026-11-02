@@ -56,11 +56,25 @@ data class Dhikr(
     val verification: VerificationStatus,
     val sourceRefs: List<SourceRef> = emptyList(),
     val notes: String? = null,
-    /** Optional verified Bengali translation; null when not yet sourced. */
+    /** Bengali meaning. Null only for a dhikr that has not been translated yet. */
     val bengali: String? = null,
+    /** Bengali title used when the app language is Bangla. */
+    val titleBn: String? = null,
+    /** Bengali-script pronunciation (উচ্চারণ). Latin pronunciation stays in [transliteration]. */
+    val pronunciationBn: String? = null,
     /** Arabic heading for display (surah name or the dhikr phrase itself). */
     val arabicTitle: String? = null,
 )
+
+fun Dhikr.titleFor(language: TranslationLanguage): String =
+    if (language == TranslationLanguage.BENGALI) titleBn ?: title else title
+
+fun Dhikr.translationFor(language: TranslationLanguage): String =
+    if (language == TranslationLanguage.BENGALI) bengali ?: translation else translation
+
+/** How to read the Arabic: Bangla script in Bangla, Latin transliteration in English. */
+fun Dhikr.pronunciationFor(language: TranslationLanguage): String =
+    if (language == TranslationLanguage.BENGALI) pronunciationBn ?: transliteration else transliteration
 
 /** Convenience greeting used by the app shell and existing tests. */
 fun greeting(): String = "Salam from ${Platform().name}"

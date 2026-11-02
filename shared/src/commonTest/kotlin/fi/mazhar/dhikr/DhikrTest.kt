@@ -12,6 +12,10 @@ class DhikrTest {
         val d = assertNotNull(DhikrCatalog.byId("subhanallah"))
         assertEquals("سُبْحَانَ اللَّهِ", d.arabic)
         assertEquals("Glory be to Allah.", d.translation)
+        assertEquals("সুবহানাল্লাহ", d.pronunciationBn)
+        assertEquals("আল্লাহ পবিত্র।", d.bengali)
+        assertEquals("সুবহানাল্লাহ", d.pronunciationFor(TranslationLanguage.BENGALI))
+        assertEquals("Subḥānallāh", d.pronunciationFor(TranslationLanguage.ENGLISH))
         assertEquals(DhikrKind.REPEATED, d.kind)
     }
 

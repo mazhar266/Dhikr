@@ -276,6 +276,15 @@ class EngineTest {
         assertEquals(RoutineId.FAJR, DhikrEngine.resumeCandidate(s2, day))
     }
 
+    @Test
+    fun routineTitle_followsLanguage() {
+        val english = DhikrEngine.routineState(SavedState(), RoutineId.FAJR, day)
+        assertEquals("Fajr", english?.title)
+        val bangla = SavedState().copy(settings = Settings(translationLanguage = TranslationLanguage.BENGALI))
+        assertEquals("ফজর", DhikrEngine.routineState(bangla, RoutineId.FAJR, day)?.title)
+        assertEquals("ঘুমানোর আগে", DhikrEngine.routineState(bangla, RoutineId.BEFORE_SLEEP, day)?.title)
+    }
+
     // ------------------------------------------------------------------ helpers
 
     private fun entryState(state: SavedState, routineId: RoutineId, order: Int): EntryUiState {

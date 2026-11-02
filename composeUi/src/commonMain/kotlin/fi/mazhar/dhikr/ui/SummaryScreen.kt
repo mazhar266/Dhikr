@@ -29,6 +29,7 @@ import fi.mazhar.dhikr.DayKeys
 fun SummaryScreen(model: AppModel, modifier: Modifier = Modifier) {
     val summary = model.summary()
     val streak = model.streak()
+    val text = uiText(model.state.settings.translationLanguage)
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -52,7 +53,7 @@ fun SummaryScreen(model: AppModel, modifier: Modifier = Modifier) {
                             )
                         }
                         Text(
-                            "day streak",
+                            text.dayStreak,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -65,7 +66,7 @@ fun SummaryScreen(model: AppModel, modifier: Modifier = Modifier) {
                             style = MaterialTheme.typography.headlineSmall,
                         )
                         Text(
-                            "repetitions today",
+                            text.repetitionsToday,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -81,7 +82,7 @@ fun SummaryScreen(model: AppModel, modifier: Modifier = Modifier) {
                         Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Routines", style = MaterialTheme.typography.titleMedium)
+                        Text(text.routines, style = MaterialTheme.typography.titleMedium)
                         Text(
                             percentText(summary.overallPercent),
                             color = MaterialTheme.colorScheme.primary,
@@ -121,13 +122,13 @@ fun SummaryScreen(model: AppModel, modifier: Modifier = Modifier) {
             item {
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp)) {
-                        Text("Unfinished", style = MaterialTheme.typography.titleMedium)
+                        Text(text.unfinished, style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.height(6.dp))
                         summary.routines.forEach { routine ->
                             val pending = routine.entries.filter { !it.complete }
                             if (pending.isNotEmpty()) {
                                 Text(
-                                    "${routine.title} — ${pending.size} remaining",
+                                    text.remaining(routine.title, pending.size),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(top = 4.dp),
@@ -145,7 +146,7 @@ fun SummaryScreen(model: AppModel, modifier: Modifier = Modifier) {
             val history = model.historyComplete(last14)
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("Last 14 days", style = MaterialTheme.typography.titleMedium)
+                    Text(text.last14Days, style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         last14.forEach { day ->
@@ -163,7 +164,7 @@ fun SummaryScreen(model: AppModel, modifier: Modifier = Modifier) {
                         }
                     }
                     Text(
-                        "A filled block is a day with at least one completed routine",
+                        text.filledBlock,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 6.dp),
@@ -174,7 +175,7 @@ fun SummaryScreen(model: AppModel, modifier: Modifier = Modifier) {
 
         item {
             Text(
-                "Counts are a tracking aid, not a measure of religious merit.",
+                text.meritNote,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

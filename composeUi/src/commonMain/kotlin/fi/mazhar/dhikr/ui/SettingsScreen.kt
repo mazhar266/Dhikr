@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
     val settings = model.state.settings
+    val text = uiText(settings.translationLanguage)
     val platform = LocalAppPlatform.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -55,19 +56,19 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                SettingsCard("Appearance") {
-                    Text("Theme", style = MaterialTheme.typography.bodyMedium)
+                SettingsCard(text.appearance) {
+                    Text(text.theme, style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(6.dp))
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         listOf(
-                            AppTheme.SYSTEM to "System",
-                            AppTheme.LIGHT to "Light",
-                            AppTheme.SOFIA_PAPER to "Sofia Paper",
-                            AppTheme.DARK to "Dark",
-                            AppTheme.OLED to "OLED Dark",
+                            AppTheme.SYSTEM to text.system,
+                            AppTheme.LIGHT to text.light,
+                            AppTheme.SOFIA_PAPER to text.sofiaPaper,
+                            AppTheme.DARK to text.dark,
+                            AppTheme.OLED to text.oledDark,
                         ).forEach { (theme, label) ->
                             FilterChip(
                                 selected = settings.theme == theme,
@@ -78,7 +79,7 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
                     }
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        "Arabic font size — ${(settings.arabicFontScale * 100).toInt()}%",
+                        text.arabicFontSize((settings.arabicFontScale * 100).toInt()),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Slider(
@@ -101,16 +102,16 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
             }
 
             item {
-                SettingsCard("Reading") {
+                SettingsCard(text.reading) {
                     SwitchRow(
-                        "Show transliteration",
+                        text.showPronunciation,
                         settings.showTransliteration,
                     ) { model.updateSettings { s -> s.copy(showTransliteration = !s.showTransliteration) } }
                     SwitchRow(
-                        "Show translation",
+                        text.showTranslation,
                         settings.showTranslation,
                     ) { model.updateSettings { s -> s.copy(showTranslation = !s.showTranslation) } }
-                    Text("Translation language", style = MaterialTheme.typography.bodyMedium)
+                    Text(text.language, style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(6.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FilterChip(
@@ -118,50 +119,41 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
                             onClick = {
                                 model.updateSettings { it.copy(translationLanguage = TranslationLanguage.ENGLISH) }
                             },
-                            label = { Text("English") },
+                            label = { Text(text.english) },
                         )
                         FilterChip(
                             selected = settings.translationLanguage == TranslationLanguage.BENGALI,
                             onClick = {
                                 model.updateSettings { it.copy(translationLanguage = TranslationLanguage.BENGALI) }
                             },
-                            label = { Text("Bengali") },
+                            label = { Text(text.bangla) },
                         )
                     }
-                    Text(
-                        "Bengali translations are not yet included; entries fall back to English.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                     Spacer(Modifier.height(4.dp))
                     SwitchRow(
-                        "Haptic feedback",
+                        text.hapticFeedback,
                         settings.haptics,
                     ) { model.updateSettings { s -> s.copy(haptics = !s.haptics) } }
                     SwitchRow(
-                        "Auto-advance after completing an entry",
+                        text.autoAdvance,
                         settings.autoAdvance,
                     ) { model.updateSettings { s -> s.copy(autoAdvance = !s.autoAdvance) } }
                 }
             }
 
             item {
-                SettingsCard("La ilaha illallah daily goal") {
+                SettingsCard(text.dailyGoal) {
                     SwitchRow(
-                        "Share between Fajr and Asr",
+                        text.shareGoal,
                         settings.sharedGoalEnabled,
                     ) { model.updateSettings { s -> s.copy(sharedGoalEnabled = !s.sharedGoalEnabled) } }
                     Text(
-                        if (settings.sharedGoalEnabled) {
-                            "One shared daily goal: completing it in either prayer satisfies both entries."
-                        } else {
-                            "Independent: Fajr and Asr count their own repetitions."
-                        },
+                        text.goalShared(settings.sharedGoalEnabled),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.height(10.dp))
-                    Text("Target", style = MaterialTheme.typography.bodyMedium)
+                    Text(text.target, style = MaterialTheme.typography.bodyMedium)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         FilterChip(
                             selected = !settings.laIlaTarget100,
@@ -178,25 +170,23 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
             }
 
             item {
-                SettingsCard("Daily reset") {
+                SettingsCard(text.dailyReset) {
                     Text(
-                        "Progress resets automatically at local midnight. " +
-                            "Previous days are kept as history.",
+                        text.resetExplain,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.height(8.dp))
                     TextButton(onClick = { confirmReset = true }) {
-                        Text("Reset today's progress")
+                        Text(text.resetToday)
                     }
                 }
             }
 
             item {
-                SettingsCard("Backup & restore") {
+                SettingsCard(text.backup) {
                     Text(
-                        "Backups are plain files you choose where to keep. " +
-                            "Restoring replaces current progress and settings.",
+                        text.backupBody,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -206,7 +196,7 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
             }
 
             item {
-                SettingsCard("About") {
+                SettingsCard(text.about) {
                     Row(
                         Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -227,23 +217,20 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
                     }
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        "A quiet companion for the daily adhkar.",
+                        text.aboutBody,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.height(10.dp))
-                    Text("Developer", style = MaterialTheme.typography.labelLarge)
+                    Text(text.developer, style = MaterialTheme.typography.labelLarge)
                     Text(
-                        "Mazhar Ahmed\n" +
-                            "BA in Islamic Studies at IOU\n" +
-                            "Dawra-e-Hadith from Qawmi Madrasa, Bangladesh",
+                        text.developerBio,
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = 4.dp),
                     )
                     Spacer(Modifier.height(10.dp))
                     Text(
-                        "Offline only · No account needed\n" +
-                            "Qur'anic text: Tanzil-verified uthmani script via quran.com",
+                        text.aboutFoot,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -256,17 +243,17 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
     if (confirmReset) {
         AlertDialog(
             onDismissRequest = { confirmReset = false },
-            title = { Text("Reset today's progress?") },
-            text = { Text("Today's counts will be cleared. Other days are kept.") },
+            title = { Text(text.resetTitle) },
+            text = { Text(text.resetBody) },
             confirmButton = {
                 TextButton(onClick = {
                     model.resetToday()
                     confirmReset = false
-                    toast("Today's progress reset")
-                }) { Text("Reset") }
+                    toast(text.progressReset)
+                }) { Text(text.reset) }
             },
             dismissButton = {
-                TextButton(onClick = { confirmReset = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmReset = false }) { Text(text.cancel) }
             },
         )
     }

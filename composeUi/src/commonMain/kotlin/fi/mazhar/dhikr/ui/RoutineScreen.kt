@@ -34,15 +34,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import fi.mazhar.dhikr.EntryUiState
 import fi.mazhar.dhikr.RoutineId
+import fi.mazhar.dhikr.pronunciationFor
+import fi.mazhar.dhikr.titleFor
 
 @Composable
 fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Modifier) {
     val routine = model.routineState(routineId)
     var unfinishedOnly by remember { mutableStateOf(false) }
+    val settings = model.state.settings
+    val text = uiText(settings.translationLanguage)
 
     Column(modifier = modifier.fillMaxSize()) {
         if (routine == null) {
-            Text("Unknown routine", Modifier.padding(16.dp))
+            Text(text.unknownRoutine, Modifier.padding(16.dp))
             return
         }
 
@@ -61,7 +65,7 @@ fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Mo
             FilterChip(
                 selected = unfinishedOnly,
                 onClick = { unfinishedOnly = !unfinishedOnly },
-                label = { Text("Unfinished only") },
+                label = { Text(text.unfinishedOnly) },
             )
         }
 
@@ -71,7 +75,16 @@ fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Mo
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(entries, key = { it.key.toString() }) { entry ->
-                EntryRow(entry) { model.openReader(routineId, entry.key.order) }
+                EntryRow(
+                    entry = entry,
+                    title = entry.dhikr.titleFor(settings.translationLanguage),
+                    pronunciation = if (settings.showTransliteration) {
+                        entry.dhikr.pronunciationFor(settings.translationLanguage)
+                    } else {
+                        null
+                    },
+                    text = text,
+                ) { model.openReader(routineId, entry.key.order) }
             }
             item { Spacer(Modifier.height(24.dp)) }
         }
@@ -79,7 +92,13 @@ fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Mo
 }
 
 @Composable
-private fun EntryRow(entry: EntryUiState, onClick: () -> Unit) {
+private fun EntryRow(
+    entry: EntryUiState,
+    title: String,
+    pronunciation: String?,
+    text: UiText,
+    onClick: () -> Unit,
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,10 +116,19 @@ private fun EntryRow(entry: EntryUiState, onClick: () -> Unit) {
             )
             Column(Modifier.weight(1f)) {
                 Text(
-                    entry.dhikr.title,
+                    title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                 )
+                if (pronunciation != null) {
+                    Text(
+                        pronunciation,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
                 Text(
                     entry.dhikr.arabic,
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -114,7 +142,7 @@ private fun EntryRow(entry: EntryUiState, onClick: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         if (entry.target == 1) {
-                            if (entry.complete) "Recited" else "Once"
+                            if (entry.complete) text.recited else text.once
                         } else {
                             "${entry.count} / ${entry.target}"
                         },
@@ -128,7 +156,7 @@ private fun EntryRow(entry: EntryUiState, onClick: () -> Unit) {
                     if (entry.viaSharedGoal) {
                         Spacer(Modifier.size(6.dp))
                         Text(
-                            "shared goal",
+                            text.sharedGoal,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.secondary,
                         )
@@ -139,7 +167,7 @@ private fun EntryRow(entry: EntryUiState, onClick: () -> Unit) {
             if (entry.complete) {
                 Icon(
                     Icons.Filled.CheckCircle,
-                    contentDescription = "Done",
+                    contentDescription = text.done,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp),
                 )

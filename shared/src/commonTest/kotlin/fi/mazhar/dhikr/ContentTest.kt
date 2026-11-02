@@ -56,8 +56,12 @@ class ContentTest {
         for (d in DhikrCatalog.all) {
             assertTrue(d.arabic.isNotBlank(), "${d.id}: arabic blank")
             assertTrue(d.transliteration.isNotBlank(), "${d.id}: transliteration blank")
+            assertTrue(!d.transliteration.contains('…'), "${d.id}: pronunciation is truncated")
             assertTrue(d.translation.isNotBlank(), "${d.id}: translation blank")
             assertTrue(d.title.isNotBlank(), "${d.id}: title blank")
+            assertTrue(d.titleBn?.isNotBlank() == true, "${d.id}: Bangla title blank")
+            assertTrue(d.pronunciationBn?.any { it in '\u0980'..'\u09FF' } == true, "${d.id}: Bangla pronunciation missing")
+            assertTrue(d.bengali?.any { it in '\u0980'..'\u09FF' } == true, "${d.id}: Bangla meaning missing")
         }
     }
 
