@@ -1,4 +1,4 @@
-"""Generate the Android launcher icons and desktop icons from the master artwork.
+"""Generate the Android launcher icons, desktop icons and iOS AppIcon from the master artwork.
 
 Usage: python tools/gen_icons.py [path/to/icon.png]   (default: icon.png at the repo root)
 
@@ -8,6 +8,8 @@ The master is a rounded-square app icon with transparent corners. Outputs:
     edge feathered into a solid background color, scaled so the arch, beads and
     tassel sit inside the 66dp safe zone of the 108dp layer.
   * Desktop: a 256px window icon and a multi-size .ico for Dhikr.exe.
+  * iOS: the single-size 1024px AppIcon (AppIcon-1024.png) — full-bleed opaque
+    square (no alpha, per App Store rules); iOS masks the corners itself.
 Requires Pillow.
 """
 
@@ -20,6 +22,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(ROOT, "androidApp", "src", "main", "res")
 DESKTOP = os.path.join(ROOT, "desktopApp")
+IOS_ASSETS = os.path.join(ROOT, "iosApp", "iosApp", "Assets.xcassets", "AppIcon.appiconset")
 
 DENSITIES = {"mdpi": 1.0, "hdpi": 1.5, "xhdpi": 2.0, "xxhdpi": 3.0, "xxxhdpi": 4.0}
 
@@ -113,7 +116,12 @@ def main():
     master.resize((256, 256), Image.LANCZOS).save(
         ico_path, sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)],
     )
-    print(f"background #{bg[0]:02X}{bg[1]:02X}{bg[2]:02X}; wrote icons to {RES} and {DESKTOP}")
+
+    square = Image.new("RGB", master.size, bg)
+    square.paste(master, mask=master.getchannel("A"))
+    save(square, os.path.join(IOS_ASSETS, "AppIcon-1024.png"), 1024)
+
+    print(f"background #{bg[0]:02X}{bg[1]:02X}{bg[2]:02X}; wrote icons to {RES}, {DESKTOP} and {IOS_ASSETS}")
 
 
 if __name__ == "__main__":

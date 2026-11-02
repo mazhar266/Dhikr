@@ -17,13 +17,21 @@ No account, no internet, no ads.
 
 ## Tech
 
-Kotlin Multiplatform. A dependency-free, JVM-tested core (`shared/`: catalog, routines, engine, state codec) and a shared Compose Multiplatform UI (`composeUi/`) power two apps: the Android app (`androidApp/`) and a Windows desktop app (`desktopApp/`). Web (JS/WasmJS) targets of the core compile too.
+Kotlin Multiplatform. A dependency-free, JVM-tested core (`shared/`: catalog, routines, engine, state codec) and a shared Compose Multiplatform UI (`composeUi/`) power three apps: the Android app (`androidApp/`), a Windows desktop app (`desktopApp/`), and an iOS app (`iosApp/` — an Xcode project over the `Dhikr` framework built from `composeUi`). Web (JS/WasmJS) targets of the core compile too.
 
 ```
 .\gradlew :shared:jvmTest                    # unit tests
 .\gradlew :androidApp:assembleRelease        # signed release APK
 .\gradlew :desktopApp:createDistributable    # Windows app (Dhikr.exe + bundled runtime)
 ```
+
+### iOS
+
+Requires a Mac with Xcode 15+ (the `ios*` Gradle targets only register on macOS):
+
+1. `./gradlew :composeUi:linkDebugFrameworkIosSimulatorArm64` — first full compile of the iOS graph (the Xcode build re-runs this via `embedAndSignAppleFrameworkForXcode` automatically).
+2. Open `iosApp/iosApp.xcodeproj`, select the `iosApp` target → *Signing & Capabilities*, and pick your team (a free Apple ID works for personal installs; free provisioning expires after 7 days, TestFlight/App Store needs the paid Apple Developer Program).
+3. Choose an iPhone simulator or device and press Cmd+R.
 
 Qur'anic passages are generated verbatim from the [quran.com](https://quran.com) API uthmani (Tanzil-verified) dataset by `tools/gen_quran_kt.py`, with fingerprint integrity tests. See [DHIKR_CONTENT_REVIEW.md](DHIKR_CONTENT_REVIEW.md) for source-by-source verification status; entries that still need scholarly review are flagged in-app rather than presented as authenticated Sunnah.
 

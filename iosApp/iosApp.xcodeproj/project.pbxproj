@@ -1,0 +1,281 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		333333333333333333333331 /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222221 /* iOSApp.swift */; };
+		333333333333333333333332 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222222 /* ContentView.swift */; };
+		333333333333333333333333 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 222222222222222222222224 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		222222222222222222222221 /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
+		222222222222222222222222 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		222222222222222222222223 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		222222222222222222222224 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		111111111111111111111118 /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		11111111111111111111111E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		111111111111111111111116 /* iosApp */ = {
+			isa = PBXGroup;
+			children = (
+				222222222222222222222221 /* iOSApp.swift */,
+				222222222222222222222222 /* ContentView.swift */,
+				222222222222222222222223 /* Info.plist */,
+				222222222222222222222224 /* Assets.xcassets */,
+			);
+			path = iosApp;
+			sourceTree = "<group>";
+		};
+		111111111111111111111115 = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111116 /* iosApp */,
+				111111111111111111111117 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		111111111111111111111117 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				111111111111111111111118 /* iosApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		111111111111111111111119 /* iosApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11111111111111111111111A /* Build configuration list for PBXNativeTarget "iosApp" */;
+			buildPhases = (
+				11111111111111111111111D /* Sources */,
+				11111111111111111111111E /* Frameworks */,
+				11111111111111111111111F /* Resources */,
+				111111111111111111111120 /* Build Dhikr Framework */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = iosApp;
+			productName = iosApp;
+			productReference = 111111111111111111111118 /* iosApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		111111111111111111111111 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				TargetAttributes = {
+					111111111111111111111119 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 111111111111111111111112 /* Build configuration list for PBXProject "iosApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 111111111111111111111115;
+			productRefGroup = 111111111111111111111117 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				111111111111111111111119 /* iosApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		11111111111111111111111F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				333333333333333333333333 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		111111111111111111111120 /* Build Dhikr Framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build Dhikr Framework";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$SRCROOT/..\"\n./gradlew :composeUi:embedAndSignAppleFrameworkForXcode\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		11111111111111111111111D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				333333333333333333333331 /* iOSApp.swift in Sources */,
+				333333333333333333333332 /* ContentView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		111111111111111111111113 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		111111111111111111111114 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		11111111111111111111111B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/../composeUi/build/bin/ios/Debug-iphoneos",
+				);
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/../composeUi/build/bin/ios/Debug-iphonesimulator",
+				);
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = iosApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Dhikr,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = fi.mazhar.dhikr;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		11111111111111111111111C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/../composeUi/build/bin/ios/Release-iphoneos",
+				);
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/../composeUi/build/bin/ios/Release-iphonesimulator",
+				);
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = iosApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Dhikr,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = fi.mazhar.dhikr;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		111111111111111111111112 /* Build configuration list for PBXProject "iosApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				111111111111111111111113 /* Debug */,
+				111111111111111111111114 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		11111111111111111111111A /* Build configuration list for PBXNativeTarget "iosApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11111111111111111111111B /* Debug */,
+				11111111111111111111111C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 111111111111111111111111 /* Project object */;
+}

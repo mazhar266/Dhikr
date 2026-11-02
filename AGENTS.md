@@ -2,9 +2,10 @@
 
 Kotlin Multiplatform app (Dhikr). Four Gradle modules (root `build.gradle.kts` loads all plugins with `apply false` — adding a module that re-applies Kotlin plugins without that breaks the build):
 - `shared/` — dependency-free KMP library: `androidTarget()`, `jvm()`, `js(IR)`, `wasmJs()`. `ios*` targets are declared **conditionally** and compile **only on macOS** (guarded in `shared/build.gradle.kts`). Holds the dhikr catalog, routine definitions, engine (progress/shared goals/streaks), and a dependency-free state codec (`SavedStateCodec`).
-- `composeUi/` — Compose Multiplatform UI library (`androidTarget()` + `jvm("desktop")`) consumed by both apps. Platform services (dates, haptics, backup pickers, version) are injected via the `AppPlatform` interface / `LocalAppPlatform`; java APIs are fine here since there are no JS/Wasm targets.
+- `composeUi/` — Compose Multiplatform UI library (`androidTarget()` + `jvm("desktop")` + conditional macOS-only `ios*` targets that build the `Dhikr` framework for the iOS app). Platform services (dates, haptics, backup pickers, version) are injected via the `AppPlatform` interface / `LocalAppPlatform`; Android/desktop actuals live in the app modules, the iOS actual + `MainViewController` entry point + `IosDhikrStore` live in `composeUi/src/iosMain` (official CMP-template pattern). Because the iOS target compiles commonMain on macOS, commonMain must stay free of `java.*`/`android.*`.
 - `androidApp/` — Android app (Kotlin + Compose, plugins `kotlinAndroid` + `composeCompiler` required; AGP alone ignores `src/main/kotlin`). Provides `AndroidPlatform` and the system `BackHandler`.
 - `desktopApp/` — Compose Desktop app for Windows (see below).
+- `iosApp/` — **Xcode project only, not a Gradle module** (absent from `settings.gradle.kts` by design). `iosApp/iosApp.xcodeproj` builds the Swift shell (SwiftUI `@main` + `ContentView` wrapping `MainViewController()`) and runs `:composeUi:embedAndSignAppleFrameworkForXcode` via a shell build phase.
 
 ## Commands
 - Use `gradlew` (`gradlew.bat`), **not** the system `gradle`.
@@ -13,6 +14,7 @@ Kotlin Multiplatform app (Dhikr). Four Gradle modules (root `build.gradle.kts` l
   - `.\gradlew :androidApp:assembleDebug` — debug APK (`androidApp/build/outputs/apk/debug/androidApp-debug.apk`).
   - `.\gradlew :androidApp:assembleRelease` — signed, R8-minified release APK (`androidApp/build/outputs/apk/release/androidApp-release.apk`). Signing reads the gitignored `keystore.properties` + `keystore/dhikr-release.jks`; without them it falls back to debug signing.
   - `.\gradlew :desktopApp:createDistributable` — self-contained Windows app image (`desktopApp/build/compose/binaries/main/app/Dhikr/`, contains `Dhikr.exe` + bundled JRE).
+  - macOS only (Xcode needed): `./gradlew :composeUi:linkDebugFrameworkIosSimulatorArm64` compiles the iOS graph; open `iosApp/iosApp.xcodeproj`, set a signing team, Cmd+R to run. On Windows/Linux the `ios*` targets don't exist, so iOS changes **cannot be compile-verified there** — check twice, then verify on a Mac.
 - JS/Wasm are browser-only; do NOT run Kotlin browser tests here (no Node/browser harness configured). Compile, don't test.
 
 ## Environment gotchas (non-obvious)
@@ -25,10 +27,10 @@ Kotlin Multiplatform app (Dhikr). Four Gradle modules (root `build.gradle.kts` l
 - `expect`/`actual` `Platform` class is **Beta** in Kotlin 2.0 — the warning is expected; leave it.
 - Adding a `nodejs()` target reintroduces the `nodejs.org` dist-repo conflict with `PREFER_SETTINGS`. Keep JS/Web browser-only.
 - `local.properties` (ignored) points `sdk.dir` at the Android SDK — needed for Android builds but not for shared-only tasks.
-- **`shared/` must stay dependency-free and platform-neutral.** No `String.format` / `java.time` in its commonMain (they don't exist on JS/Wasm; use `DayKeys`-style helpers). On wasmJs, JS interop uses `@kotlin.JsFun("...")` on `external fun`s. `composeUi/` has no JS targets, so it may use `java.io`/`java.text` in commonMain.
+- **`shared/` must stay dependency-free and platform-neutral.** No `String.format` / `java.time` in its commonMain (they don't exist on JS/Wasm; use `DayKeys`-style helpers). On wasmJs, JS interop uses `@kotlin.JsFun("...")` on `external fun`s. `composeUi/` commonMain is compiled for iOS too, so it must equally stay free of `java.*`/`android.*`; platform APIs belong in `iosMain`/the app modules. (`NSDateComponents` is an ObjC class, **not** a C struct — never `useContents` on it.)
 - **Expect classes consumed by other KMP modules**: `expect class SystemClock() : Clock` must declare its interface members (`override fun ...`) in the header, and actuals mark them `actual override` — otherwise `:shared:compileCommonMainKotlinMetadata` fails once another multiplatform module (composeUi) consumes shared.
 - **Qur'an text is generated, never hand-edited**: run `python tools/gen_quran_kt.py` (env `QURAN_JSON_DIR` pointing at quran.com API JSON dumps) to regenerate `shared/.../content/QuranTexts.kt`; `ContentTest` asserts FNV-1a fingerprints against the verified dataset.
-- **App icons are generated from `icon.png`** (repo root, the master artwork): run `python tools/gen_icons.py` (needs Pillow) to rewrite the Android mipmaps/adaptive icon and `desktopApp/icons/dhikr.ico` + window icon. Don't hand-edit the outputs.
+- **App icons are generated from `icon.png`** (repo root, the master artwork): run `python tools/gen_icons.py` (needs Pillow) to rewrite the Android mipmaps/adaptive icon, `desktopApp/icons/dhikr.ico` + window icon, and the iOS `AppIcon-1024.png`. Don't hand-edit the outputs.
 - Release signing never gets committed: `keystore.properties` and `keystore/` are gitignored; back the keystore up — losing it means the app can never be updated under the same signing key.
 
 ## Verification order
