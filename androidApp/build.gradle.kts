@@ -15,15 +15,15 @@ afterEvaluate {
 }
 
 android {
-    namespace = "com.hikmah.dhikr.android"
+    namespace = "fi.mazhar.dhikr.android"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.hikmah.dhikr"
+        applicationId = "fi.mazhar.dhikr"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
     }
 
     buildTypes {
@@ -34,6 +34,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {

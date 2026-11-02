@@ -15,7 +15,7 @@ afterEvaluate {
 }
 
 android {
-    namespace = "com.hikmah.dhikr.shared"
+    namespace = "fi.mazhar.dhikr.shared"
     compileSdk = 35
     defaultConfig {
         minSdk = 24

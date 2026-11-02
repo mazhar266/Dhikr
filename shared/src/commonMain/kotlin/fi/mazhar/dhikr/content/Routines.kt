@@ -1,0 +1,137 @@
+package fi.mazhar.dhikr.content
+
+import fi.mazhar.dhikr.RoutineEntry
+import fi.mazhar.dhikr.RoutineId
+
+/**
+ * The six bundled routines. Entry order, repetition targets, and prayer
+ * associations follow the user's personal inventory (see the task brief and
+ * DHIKR_CONTENT_REVIEW.md); where a verified hadith establishes a different
+ * count or timing, the user's requested default is preserved and the
+ * difference is documented on the [DhikrCatalog] notes.
+ */
+data class RoutineDefinition(
+    val id: RoutineId,
+    val title: String,
+    val arabicTitle: String,
+    val description: String,
+    val entries: List<RoutineEntry>,
+)
+
+object Routines {
+
+    /** Shared daily goal: the "La ilaha illallah" 10×/100× tasbih (Fajr ↔ Asr). */
+    const val LA_ILA_GOAL_ID = "goal-la-ilaha-illallah"
+
+    private fun entry(routine: RoutineId, order: Int, dhikrId: String, target: Int) =
+        RoutineEntry(key = fi.mazhar.dhikr.RoutineKey(routine, order), dhikrId = dhikrId, target = target)
+
+    private fun laIlaEntry(routine: RoutineId, order: Int, conditional: Boolean) = RoutineEntry(
+        key = fi.mazhar.dhikr.RoutineKey(routine, order),
+        dhikrId = "la-ilaha-illallah-goal",
+        target = 10, // default; effective target follows Settings.laIlaTarget100
+        sharedGoalId = LA_ILA_GOAL_ID,
+        conditionalOnGoal = conditional,
+    )
+
+    private val fajrEntries: List<RoutineEntry> = listOf(
+        entry(RoutineId.FAJR, 1, "allahu-akbar", 1),
+        entry(RoutineId.FAJR, 2, "astaghfirullah", 3),
+        entry(RoutineId.FAJR, 3, "takbir-tahlil-after-salam", 1),
+        entry(RoutineId.FAJR, 4, "antas-salam", 1),
+        entry(RoutineId.FAJR, 5, "ajirni-minan-nar", 7),
+        entry(RoutineId.FAJR, 6, "quran-ayatul-kursi", 1),
+        entry(RoutineId.FAJR, 7, "quran-hashr-59-22-24", 1),
+        entry(RoutineId.FAJR, 8, "quran-kafirun", 1),
+        entry(RoutineId.FAJR, 9, "quran-ikhlas", 3),
+        entry(RoutineId.FAJR, 10, "quran-falaq", 3),
+        entry(RoutineId.FAJR, 11, "quran-nas", 3),
+        entry(RoutineId.FAJR, 12, "subhanallah", 33),
+        entry(RoutineId.FAJR, 13, "alhamdulillah", 33),
+        entry(RoutineId.FAJR, 14, "allahu-akbar", 34),
+        entry(RoutineId.FAJR, 15, "salawat-ibrahimiyyah", 10),
+        entry(RoutineId.FAJR, 16, "raditu-billahi", 3),
+        entry(RoutineId.FAJR, 17, "hasbiyallahu", 7),
+        entry(RoutineId.FAJR, 18, "audhu-kalimat-min-sharri", 3),
+        entry(RoutineId.FAJR, 19, "audhu-kalimat-shaytan", 1),
+        entry(RoutineId.FAJR, 20, "audhu-kalimat-ghadab", 1),
+        entry(RoutineId.FAJR, 21, "bismillah-la-yadurru", 3),
+        entry(RoutineId.FAJR, 22, "sayyidul-istighfar", 1),
+        entry(RoutineId.FAJR, 23, "afini-badani", 3),
+        laIlaEntry(RoutineId.FAJR, 24, conditional = false),
+        entry(RoutineId.FAJR, 25, "subhanallahi-wabihamdihi-100", 100),
+        entry(RoutineId.FAJR, 26, "istighfar-100", 100),
+        entry(RoutineId.FAJR, 27, "hammi-wal-hazan", 1),
+        entry(RoutineId.FAJR, 28, "ya-hayyu-ya-qayyum", 1),
+        entry(RoutineId.FAJR, 29, "ilman-nafian", 1),
+    )
+
+    /**
+     * Asr = Fajr items 1–23 (re-keyed to ASR so progress never merges across
+     * routines), the conditional shared-goal item 24, then items 25–28.
+     * Fajr item 29 (beneficial knowledge) is Fajr-only per the inventory.
+     */
+    private val asrEntries: List<RoutineEntry> =
+        fajrEntries.take(23).map { it.copy(key = fi.mazhar.dhikr.RoutineKey(RoutineId.ASR, it.key.order)) } +
+            laIlaEntry(RoutineId.ASR, 24, conditional = true) +
+            fajrEntries.drop(24).dropLast(1)
+                .map { it.copy(key = fi.mazhar.dhikr.RoutineKey(RoutineId.ASR, it.key.order)) }
+
+    private fun shortRoutine(id: RoutineId, title: String, arabicTitle: String, description: String) =
+        RoutineDefinition(
+            id = id,
+            title = title,
+            arabicTitle = arabicTitle,
+            description = description,
+            entries = listOf(
+                entry(id, 1, "quran-ayatul-kursi", 1),
+                entry(id, 2, "subhanallah", 33),
+                entry(id, 3, "alhamdulillah", 33),
+                entry(id, 4, "allahu-akbar", 34),
+                entry(id, 5, "salawat-ibrahimiyyah", 10),
+            ),
+        )
+
+    private val items: List<RoutineDefinition> = listOf(
+        RoutineDefinition(
+            id = RoutineId.FAJR,
+            title = "Fajr",
+            arabicTitle = "الْفَجْر",
+            description = "Morning adhkar after the Fajr prayer",
+            entries = fajrEntries,
+        ),
+        shortRoutine(RoutineId.DHUHR, "Dhuhr", "الظُّهْر", "Adhkar after the Dhuhr prayer"),
+        RoutineDefinition(
+            id = RoutineId.ASR,
+            title = "Asr",
+            arabicTitle = "الْعَصْر",
+            description = "Afternoon adhkar after the Asr prayer",
+            entries = asrEntries,
+        ),
+        shortRoutine(RoutineId.MAGHRIB, "Maghrib", "الْمَغْرِب", "Adhkar after the Maghrib prayer"),
+        shortRoutine(RoutineId.ISHA, "Isha", "الْعِشَاء", "Adhkar after the Isha prayer"),
+        RoutineDefinition(
+            id = RoutineId.BEFORE_SLEEP,
+            title = "Before Sleep",
+            arabicTitle = "قَبْلَ النَّوْم",
+            description = "The sleeping adhkar",
+            entries = listOf(
+                entry(RoutineId.BEFORE_SLEEP, 1, "quran-ayatul-kursi", 1),
+                entry(RoutineId.BEFORE_SLEEP, 2, "quran-baqarah-285-286", 1),
+                entry(RoutineId.BEFORE_SLEEP, 3, "quran-ikhlas", 3),
+                entry(RoutineId.BEFORE_SLEEP, 4, "quran-falaq", 3),
+                entry(RoutineId.BEFORE_SLEEP, 5, "quran-nas", 3),
+            ),
+        ),
+    )
+
+    private val byId: Map<RoutineId, RoutineDefinition> = items.associateBy { it.id }
+
+    val all: List<RoutineDefinition> get() = items
+
+    fun byId(id: RoutineId): RoutineDefinition? = byId[id]
+
+    /** Routines that contain an entry wired to the given shared goal id. */
+    fun routinesForGoal(goalId: String): List<RoutineId> =
+        items.filter { def -> def.entries.any { it.sharedGoalId == goalId } }.map { it.id }
+}
