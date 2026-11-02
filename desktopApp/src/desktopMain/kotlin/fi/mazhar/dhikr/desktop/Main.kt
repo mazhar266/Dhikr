@@ -1,0 +1,58 @@
+package fi.mazhar.dhikr.desktop
+
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import fi.mazhar.dhikr.DhikrRepository
+import fi.mazhar.dhikr.SystemClock
+import fi.mazhar.dhikr.ui.AppModel
+import fi.mazhar.dhikr.ui.DhikrApp
+import fi.mazhar.dhikr.ui.LocalAppPlatform
+import java.io.File
+
+fun main() {
+    val store = FileDhikrStore(
+        File(System.getProperty("user.home"), ".dhikr").resolve("dhikr_state.txt"),
+    )
+    val repo = DhikrRepository(store, SystemClock())
+    repo.load()
+    val model = AppModel(repo)
+
+    application {
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "Dhikr",
+            state = rememberWindowState(size = DpSize(430.dp, 820.dp)),
+        ) {
+            CompositionLocalProvider(LocalAppPlatform provides DesktopPlatform) {
+                DhikrApp(model)
+            }
+        }
+    }
+}
+
+/** Same atomic single-file persistence as the Android app. */
+class FileDhikrStore(private val file: File) : fi.mazhar.dhikr.DhikrStore {
+
+    override fun load(): fi.mazhar.dhikr.SavedState? = try {
+        if (file.exists()) {
+            fi.mazhar.dhikr.SavedStateCodec.decode(file.readText(Charsets.UTF_8))
+        } else {
+            null
+        }
+    } catch (_: Exception) {
+        null
+    }
+
+    override fun save(state: fi.mazhar.dhikr.SavedState) {
+        val tmp = File(file.parentFile, file.name + ".tmp")
+        tmp.writeText(fi.mazhar.dhikr.SavedStateCodec.encode(state), Charsets.UTF_8)
+        if (!tmp.renameTo(file)) {
+            file.writeText(fi.mazhar.dhikr.SavedStateCodec.encode(state), Charsets.UTF_8)
+            tmp.delete()
+        }
+    }
+}

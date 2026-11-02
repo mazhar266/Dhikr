@@ -37,4 +37,7 @@ class FixedClock(
  * they roll over at local midnight and stay correct across timezone/DST
  * changes (each call re-reads the current zone).
  */
-expect class SystemClock() : Clock
+expect class SystemClock() : Clock {
+    override fun nowMillis(): Long
+    override fun currentDayKey(): String
+}

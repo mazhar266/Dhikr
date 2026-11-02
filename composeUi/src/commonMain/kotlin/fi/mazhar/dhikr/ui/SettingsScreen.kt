@@ -1,8 +1,5 @@
-package fi.mazhar.dhikr.android.ui
+package fi.mazhar.dhikr.ui
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -34,55 +31,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import fi.mazhar.dhikr.AppTheme
 import fi.mazhar.dhikr.TranslationLanguage
-import fi.mazhar.dhikr.android.BuildConfig
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
     val settings = model.state.settings
-    val context = LocalContext.current
+    val platform = LocalAppPlatform.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var confirmReset by remember { mutableStateOf(false) }
 
     fun toast(message: String) {
         scope.launch { snackbar.showSnackbar(message) }
-    }
-
-    val exportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("text/plain"),
-    ) { uri: Uri? ->
-        if (uri != null) {
-            try {
-                context.contentResolver.openOutputStream(uri)?.use { out ->
-                    out.write(model.export().toByteArray(Charsets.UTF_8))
-                }
-                toast("Backup saved")
-            } catch (e: Exception) {
-                toast("Backup failed: ${e.message}")
-            }
-        }
-    }
-
-    val importLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument(),
-    ) { uri: Uri? ->
-        if (uri != null) {
-            try {
-                val text = context.contentResolver.openInputStream(uri)?.use { input ->
-                    input.readBytes().toString(Charsets.UTF_8)
-                }
-                val ok = text != null && model.restore(text)
-                toast(if (ok) "Backup restored" else "Not a valid Dhikr backup")
-            } catch (e: Exception) {
-                toast("Restore failed: ${e.message}")
-            }
-        }
     }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -237,14 +201,7 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(Modifier.height(8.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = {
-                            exportLauncher.launch("dhikr-backup-${model.todayKey()}.txt")
-                        }) { Text("Export…") }
-                        TextButton(onClick = {
-                            importLauncher.launch(arrayOf("text/plain", "text/*", "*/*"))
-                        }) { Text("Import…") }
-                    }
+                    platform.BackupSection(model) { message -> toast(message) }
                 }
             }
 
@@ -261,7 +218,7 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
                             color = MaterialTheme.colorScheme.primaryContainer,
                         ) {
                             Text(
-                                "Version ${BuildConfig.VERSION_NAME}",
+                                "Version ${platform.version()}",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),

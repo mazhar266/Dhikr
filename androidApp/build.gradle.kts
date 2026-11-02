@@ -1,4 +1,13 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+import java.io.FileInputStream
+import java.util.Properties
+
+// Release signing reads keystore.properties (gitignored). When it is absent
+// the release build falls back to debug signing so CI builds never break.
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) load(FileInputStream(keystorePropsFile))
+}
 
 plugins {
     alias(libs.plugins.androidApp)
@@ -26,9 +35,30 @@ android {
         versionName = "1.0.0"
     }
 
+    signingConfigs {
+        if (keystorePropsFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+            signingConfig = if (keystorePropsFile.exists()) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
         }
     }
 
@@ -45,6 +75,7 @@ android {
 
 dependencies {
     implementation(project(":shared"))
+    implementation(project(":composeUi"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.foundation)

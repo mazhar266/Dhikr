@@ -16,4 +16,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Dhikr"
 include(":shared")
+include(":composeUi")
+include(":desktopApp")
 include(":androidApp")

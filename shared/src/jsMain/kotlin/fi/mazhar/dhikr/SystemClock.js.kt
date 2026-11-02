@@ -3,9 +3,9 @@ package fi.mazhar.dhikr
 import kotlin.js.Date
 
 actual class SystemClock actual constructor() : Clock {
-    override fun nowMillis(): Long = Date().getTime().toLong()
+    actual override fun nowMillis(): Long = Date().getTime().toLong()
 
-    override fun currentDayKey(): String {
+    actual override fun currentDayKey(): String {
         val d = Date()
         return pad4(d.getFullYear()) + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate())
     }

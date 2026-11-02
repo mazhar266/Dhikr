@@ -1,4 +1,4 @@
-package fi.mazhar.dhikr.android.ui
+package fi.mazhar.dhikr.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

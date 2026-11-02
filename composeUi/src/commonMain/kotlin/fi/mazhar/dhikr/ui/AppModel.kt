@@ -1,4 +1,4 @@
-package fi.mazhar.dhikr.android.ui
+package fi.mazhar.dhikr.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

@@ -16,11 +16,12 @@ No account, no internet, no ads.
 
 ## Tech
 
-Kotlin Multiplatform (`shared/`: Android, JVM, JS, WasmJs; iOS targets compile on macOS) with a dependency-free, JVM-tested core (catalog, routines, engine, state codec) and a Jetpack Compose Android app.
+Kotlin Multiplatform. A dependency-free, JVM-tested core (`shared/`: catalog, routines, engine, state codec) and a shared Compose Multiplatform UI (`composeUi/`) power two apps: the Android app (`androidApp/`) and a Windows desktop app (`desktopApp/`). Web (JS/WasmJS) targets of the core compile too.
 
 ```
-.\gradlew :shared:jvmTest          # unit tests
-.\gradlew :androidApp:assembleDebug  # debug APK
+.\gradlew :shared:jvmTest                    # unit tests
+.\gradlew :androidApp:assembleRelease        # signed release APK
+.\gradlew :desktopApp:createDistributable    # Windows app (Dhikr.exe + bundled runtime)
 ```
 
 Qur'anic passages are generated verbatim from the [quran.com](https://quran.com) API uthmani (Tanzil-verified) dataset by `tools/gen_quran_kt.py`, with fingerprint integrity tests. See [DHIKR_CONTENT_REVIEW.md](DHIKR_CONTENT_REVIEW.md) for source-by-source verification status; entries that still need scholarly review are flagged in-app rather than presented as authenticated Sunnah.

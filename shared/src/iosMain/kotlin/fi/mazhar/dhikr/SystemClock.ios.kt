@@ -11,9 +11,9 @@ import platform.Foundation.timeIntervalSince1970
 
 @OptIn(ExperimentalForeignApi::class)
 actual class SystemClock actual constructor() : Clock {
-    override fun nowMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()
+    actual override fun nowMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()
 
-    override fun currentDayKey(): String {
+    actual override fun currentDayKey(): String {
         val comps = NSCalendar.currentCalendar.components(
             NSCalendarUnitYear or NSCalendarUnitMonth or NSCalendarUnitDay,
             NSDate(),

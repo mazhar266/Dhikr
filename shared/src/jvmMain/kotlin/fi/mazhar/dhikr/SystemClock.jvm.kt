@@ -3,7 +3,7 @@ package fi.mazhar.dhikr
 import java.time.LocalDate
 
 actual class SystemClock actual constructor() : Clock {
-    override fun nowMillis(): Long = System.currentTimeMillis()
+    actual override fun nowMillis(): Long = System.currentTimeMillis()
 
-    override fun currentDayKey(): String = LocalDate.now().toString()
+    actual override fun currentDayKey(): String = LocalDate.now().toString()
 }

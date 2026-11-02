@@ -6,7 +6,7 @@ import fi.mazhar.dhikr.DhikrStore
 import fi.mazhar.dhikr.SavedState
 import fi.mazhar.dhikr.SavedStateCodec
 import fi.mazhar.dhikr.SystemClock
-import fi.mazhar.dhikr.android.ui.AppModel
+import fi.mazhar.dhikr.ui.AppModel
 import java.io.File
 
 /**

@@ -1,0 +1,45 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
+plugins {
+    alias(libs.plugins.multiplatform)
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
+}
+
+afterEvaluate {
+    tasks.withType<KotlinJvmCompile>().configureEach {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
+}
+
+kotlin {
+    jvm("desktop")
+
+    sourceSets {
+        val desktopMain by getting {
+            dependencies {
+                implementation(project(":composeUi"))
+                implementation(compose.desktop.currentOs)
+                implementation(compose.material3)
+            }
+        }
+    }
+}
+
+compose.desktop.application {
+    mainClass = "fi.mazhar.dhikr.desktop.MainKt"
+
+    nativeDistributions {
+        // AppImage is a self-contained folder with Dhikr.exe and needs no
+        // external tooling; MSI/EXE installers would additionally require WiX.
+        targetFormats(TargetFormat.AppImage)
+        packageName = "Dhikr"
+        packageVersion = "1.0.0"
+        description = "A quiet companion for the daily adhkar"
+        vendor = "Mazhar Ahmed"
+        copyright = "© 2026 Mazhar Ahmed"
+    }
+}

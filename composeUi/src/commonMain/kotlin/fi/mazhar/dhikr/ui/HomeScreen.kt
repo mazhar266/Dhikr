@@ -1,4 +1,4 @@
-package fi.mazhar.dhikr.android.ui
+package fi.mazhar.dhikr.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +33,7 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
     val summary = model.summary()
     val resume = model.resumeCandidate()
     val streak = model.streak()
+    val platform = LocalAppPlatform.current
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -48,11 +49,11 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    gregorianDateText(),
+                    platform.todayGregorian(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                hijriDateText()?.let { hijri ->
+                platform.todayHijri()?.let { hijri ->
                     Text(
                         hijri,
                         style = MaterialTheme.typography.bodyMedium,

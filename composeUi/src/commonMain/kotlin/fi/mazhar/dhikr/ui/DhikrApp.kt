@@ -1,6 +1,5 @@
-package fi.mazhar.dhikr.android.ui
+package fi.mazhar.dhikr.ui
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -23,10 +22,6 @@ import androidx.compose.ui.Modifier
 @Composable
 fun DhikrApp(model: AppModel) {
     DhikrAppTheme(model.state.settings) {
-        BackHandler(enabled = model.screen !is Screen.Home || model.canGoBack()) {
-            model.back()
-        }
-
         val showBottomBar = when (model.screen) {
             is Screen.Home, is Screen.Summary, is Screen.Settings -> true
             else -> false

@@ -11,3 +11,10 @@ local.properties
 # OS / misc
 .DS_Store
 *.log
+
+# Release signing (never commit)
+keystore/
+keystore.properties
+
+# Built artifacts (local outputs only)
+dist/

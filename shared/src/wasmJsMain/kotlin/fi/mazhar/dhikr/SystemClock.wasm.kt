@@ -3,9 +3,9 @@ package fi.mazhar.dhikr
 import kotlin.JsFun
 
 actual class SystemClock actual constructor() : Clock {
-    override fun nowMillis(): Long = jsNow().toLong()
+    actual override fun nowMillis(): Long = jsNow().toLong()
 
-    override fun currentDayKey(): String = jsDayKey()
+    actual override fun currentDayKey(): String = jsDayKey()
 }
 
 /** Local-date day key, built in JS so the browser timezone is respected. */

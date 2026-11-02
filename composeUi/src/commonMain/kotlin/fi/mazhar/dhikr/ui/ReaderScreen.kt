@@ -1,4 +1,4 @@
-package fi.mazhar.dhikr.android.ui
+package fi.mazhar.dhikr.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,7 +37,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
@@ -56,7 +55,6 @@ fun ReaderScreen(model: AppModel, routineId: RoutineId, order: Int, modifier: Mo
         return
     }
     val settings = model.state.settings
-    val context = LocalContext.current
     var showTargetDialog by remember { mutableStateOf(false) }
 
     val position = entries.indexOfFirst { it.key.order == order }
@@ -186,16 +184,16 @@ private fun Controls(
     onNext: () -> Unit,
     onEditTarget: () -> Unit,
 ) {
-    val context = LocalContext.current
+    val platform = LocalAppPlatform.current
     val haptics = model.state.settings.haptics
 
     fun onTap() {
         val wasComplete = entry.complete
         model.increment(entry.key)
         if (haptics && !wasComplete && entry.count + 1 >= entry.target) {
-            vibrate(context, strong = true)
+            platform.vibrate(strong = true)
         } else if (haptics) {
-            vibrate(context, strong = false)
+            platform.vibrate(strong = false)
         }
     }
 
@@ -234,7 +232,7 @@ private fun Controls(
             IconButton(
                 onClick = {
                     model.decrement(entry.key)
-                    if (haptics) vibrate(context, strong = false)
+                    if (haptics) platform.vibrate(strong = false)
                 },
                 enabled = entry.count > 0,
             ) {
@@ -249,7 +247,7 @@ private fun Controls(
                     } else {
                         onTap()
                     }
-                    if (haptics && isOnce) vibrate(context, strong = true)
+                    if (haptics && isOnce) platform.vibrate(strong = true)
                 },
                 enabled = !entry.complete,
                 modifier = Modifier
