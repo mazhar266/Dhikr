@@ -2,7 +2,9 @@ package fi.mazhar.dhikr
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PersonalRoutineTest {
@@ -34,6 +36,31 @@ class PersonalRoutineTest {
         restored.removePersonalDhikr(id, first.key.order)
         assertEquals(2, restored.entriesOf(id).size)
         assertTrue(restored.state.progress.isEmpty())
+    }
+
+    @Test
+    fun deletingAListRemovesOnlyItsProgressAndResumeState() {
+        val store = InMemoryDhikrStore()
+        val clock = FixedClock("2026-11-09")
+        val repo = DhikrRepository(store, clock)
+        val deleted = assertNotNull(repo.createPersonalRoutine("My Fajr"))
+        val kept = assertNotNull(repo.createPersonalRoutine("My Asr"))
+        for (id in listOf(deleted, kept)) {
+            repo.savePersonalDhikr(id, null, "", "Astaghfirullāh", "", 3)
+            repo.increment(repo.entriesOf(id).single().key)
+        }
+        repo.setLastOpened(deleted)
+
+        assertFalse(repo.deletePersonalRoutine(RoutineId.FAJR))
+        assertTrue(repo.deletePersonalRoutine(deleted))
+        assertFalse(repo.deletePersonalRoutine(deleted))
+
+        val reloaded = DhikrRepository(store, clock).apply { load() }
+        assertNull(reloaded.routineState(deleted))
+        assertNull(reloaded.state.lastOpenedRoutine)
+        assertEquals(listOf(kept), reloaded.state.personalRoutines.map { it.id })
+        assertEquals(1, reloaded.entriesOf(kept).single().count)
+        assertEquals(listOf(kept), reloaded.state.progress.map { it.routineKey.routineId })
     }
 
     @Test

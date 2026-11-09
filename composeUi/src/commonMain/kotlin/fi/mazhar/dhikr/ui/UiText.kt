@@ -25,6 +25,8 @@ interface UiText {
     val personalLists: String
     val newPersonalList: String
     val renamePersonalList: String
+    val deletePersonalList: String
+    val deletePersonalListMessage: String
     val personalListName: String
     val addPersonalDhikr: String
     val editPersonalDhikr: String
@@ -125,6 +127,8 @@ private object EnglishUi : UiText {
     override val personalLists = "My lists"
     override val newPersonalList = "New list"
     override val renamePersonalList = "Rename list"
+    override val deletePersonalList = "Delete list"
+    override val deletePersonalListMessage = "Delete this list, all its dhikr, and its recorded progress?"
     override val personalListName = "List name"
     override val addPersonalDhikr = "Add dhikr"
     override val editPersonalDhikr = "Edit dhikr"
@@ -229,6 +233,8 @@ private object BanglaUi : UiText {
     override val personalLists = "আমার তালিকা"
     override val newPersonalList = "নতুন তালিকা"
     override val renamePersonalList = "তালিকার নাম বদলান"
+    override val deletePersonalList = "তালিকা মুছুন"
+    override val deletePersonalListMessage = "এই তালিকা, এর সব যিকির ও সংরক্ষিত অগ্রগতি মুছে ফেলবেন?"
     override val personalListName = "তালিকার নাম"
     override val addPersonalDhikr = "যিকির যোগ করুন"
     override val editPersonalDhikr = "যিকির সম্পাদনা করুন"

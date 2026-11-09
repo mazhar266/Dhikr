@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -51,6 +52,7 @@ fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Mo
     val text = uiText(settings.translationLanguage)
     val personal = model.state.personalRoutines.firstOrNull { it.id == routineId }
     var renaming by rememberSaveable(routineId.name) { mutableStateOf(false) }
+    var confirmingDelete by rememberSaveable(routineId.name) { mutableStateOf(false) }
     var editingOrder by rememberSaveable(routineId.name) { mutableStateOf<Int?>(null) }
 
     if (personal != null && renaming) {
@@ -60,6 +62,21 @@ fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Mo
         }
     }
     if (personal != null) {
+        if (confirmingDelete) {
+            AlertDialog(
+                onDismissRequest = { confirmingDelete = false },
+                title = { Text(personal.title) },
+                text = { Text(text.deletePersonalListMessage) },
+                confirmButton = {
+                    TextButton(onClick = { model.deletePersonalRoutine(routineId) }) {
+                        Text(text.deletePersonalList, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { confirmingDelete = false }) { Text(text.cancel) }
+                },
+            )
+        }
         editingOrder?.let { order ->
             val initial = personal.entries.firstOrNull { it.order == order }
             if (order == 0 || initial != null) {
@@ -99,7 +116,12 @@ fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Mo
                     color = MaterialTheme.colorScheme.primary,
                 )
             } else {
-                TextButton(onClick = { renaming = true }) { Text(text.renamePersonalList) }
+                Column {
+                    TextButton(onClick = { renaming = true }) { Text(text.renamePersonalList) }
+                    TextButton(onClick = { confirmingDelete = true }) {
+                        Text(text.deletePersonalList, color = MaterialTheme.colorScheme.error)
+                    }
+                }
             }
             FilterChip(
                 selected = unfinishedOnly,

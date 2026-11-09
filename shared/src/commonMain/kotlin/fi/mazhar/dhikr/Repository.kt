@@ -73,6 +73,17 @@ class DhikrRepository(
         if (name.isNotEmpty()) updatePersonalRoutine(id) { it.copy(title = name) }
     }
 
+    fun deletePersonalRoutine(id: RoutineId): Boolean {
+        if (!id.isPersonal || state.personalRoutines.none { it.id == id }) return false
+        commit(state.copy(
+            personalRoutines = state.personalRoutines.filterNot { it.id == id },
+            progress = state.progress.filterNot { it.routineKey.routineId == id },
+            targetOverrides = state.targetOverrides.filterKeys { !it.startsWith("${id.name}-") },
+            lastOpenedRoutine = state.lastOpenedRoutine?.takeUnless { it == id },
+        ))
+        return true
+    }
+
     fun savePersonalDhikr(id: RoutineId, order: Int?, arabic: String, pronunciation: String, meaning: String, target: Int) {
         if (target < 1 || listOf(arabic, pronunciation, meaning).all { it.isBlank() }) return
         updatePersonalRoutine(id) { routine ->

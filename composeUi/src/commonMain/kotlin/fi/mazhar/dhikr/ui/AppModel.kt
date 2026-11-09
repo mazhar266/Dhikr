@@ -130,6 +130,13 @@ class AppModel(val repo: DhikrRepository) {
         state = repo.state
     }
 
+    fun deletePersonalRoutine(id: RoutineId) {
+        if (repo.deletePersonalRoutine(id)) {
+            state = repo.state
+            goHome()
+        }
+    }
+
     fun savePersonalDhikr(id: RoutineId, order: Int?, arabic: String, pronunciation: String, meaning: String, target: Int) {
         repo.savePersonalDhikr(id, order, arabic, pronunciation, meaning, target)
         state = repo.state
