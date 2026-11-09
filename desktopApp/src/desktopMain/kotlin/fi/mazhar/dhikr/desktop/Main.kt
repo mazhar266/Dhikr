@@ -3,6 +3,15 @@ package fi.mazhar.dhikr.desktop
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -13,6 +22,7 @@ import fi.mazhar.dhikr.SystemClock
 import fi.mazhar.dhikr.ui.AppModel
 import fi.mazhar.dhikr.ui.DhikrApp
 import fi.mazhar.dhikr.ui.LocalAppPlatform
+import fi.mazhar.dhikr.ui.Screen
 import java.io.File
 import java.nio.file.Files
 import javax.imageio.ImageIO
@@ -35,12 +45,28 @@ fun main() {
             title = "Dhikr",
             icon = icon,
             state = rememberWindowState(size = DpSize(430.dp, 820.dp)),
+            onPreviewKeyEvent = { handleReaderCountKey(model, it) },
         ) {
             CompositionLocalProvider(LocalAppPlatform provides DesktopPlatform) {
                 DhikrApp(model)
             }
         }
     }
+}
+
+private fun handleReaderCountKey(model: AppModel, event: KeyEvent): Boolean {
+    val reader = model.screen as? Screen.Reader ?: return false
+    if (event.isAltPressed || event.isCtrlPressed || event.isMetaPressed || event.isShiftPressed) return false
+    when (event.key) {
+        Key.Spacebar, Key.Enter, Key.NumPadEnter, Key.DirectionRight -> Unit
+        else -> return false
+    }
+    // Consume the press before focused controls see it, then count on release
+    // so holding a key cannot trigger the counter repeatedly.
+    if (event.type == KeyEventType.KeyUp) {
+        model.entry(reader.id, reader.order)?.let(model::count)
+    }
+    return true
 }
 
 /** Same atomic single-file persistence as the Android app. */

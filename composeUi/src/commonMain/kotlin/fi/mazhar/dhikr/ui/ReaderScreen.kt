@@ -201,16 +201,6 @@ private fun Controls(
     val platform = LocalAppPlatform.current
     val haptics = model.state.settings.haptics
 
-    fun onTap() {
-        val wasComplete = entry.complete
-        model.increment(entry.key)
-        if (haptics && !wasComplete && entry.count + 1 >= entry.target) {
-            platform.vibrate(strong = true)
-        } else if (haptics) {
-            platform.vibrate(strong = false)
-        }
-    }
-
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Row(
             Modifier.fillMaxWidth(),
@@ -251,12 +241,8 @@ private fun Controls(
             val isOnce = entry.dhikr.kind == DhikrKind.RECITE_ONCE && entry.target == 1
             Button(
                 onClick = {
-                    if (isOnce) {
-                        model.markRecited(entry.key)
-                    } else {
-                        onTap()
-                    }
-                    if (haptics && isOnce) platform.vibrate(strong = true)
+                    model.count(entry)
+                    if (haptics) platform.vibrate(strong = entry.count + 1 >= entry.target)
                 },
                 enabled = !entry.complete,
                 modifier = Modifier

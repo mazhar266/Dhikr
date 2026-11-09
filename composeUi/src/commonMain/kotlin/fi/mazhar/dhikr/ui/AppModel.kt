@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import fi.mazhar.dhikr.DhikrEngine
+import fi.mazhar.dhikr.DhikrKind
 import fi.mazhar.dhikr.DhikrRepository
 import fi.mazhar.dhikr.EntryUiState
 import fi.mazhar.dhikr.RoutineId
@@ -100,18 +101,18 @@ class AppModel(val repo: DhikrRepository) {
 
     // ------------------------------------------------------------ mutations
 
-    fun increment(key: RoutineKey) {
-        repo.increment(key)
+    fun count(entry: EntryUiState) {
+        if (entry.complete) return
+        if (entry.dhikr.kind == DhikrKind.RECITE_ONCE && entry.target == 1) {
+            repo.markRecited(entry.key)
+        } else {
+            repo.increment(entry.key)
+        }
         state = repo.state
     }
 
     fun decrement(key: RoutineKey) {
         repo.decrement(key)
-        state = repo.state
-    }
-
-    fun markRecited(key: RoutineKey) {
-        repo.markRecited(key)
         state = repo.state
     }
 
