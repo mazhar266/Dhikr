@@ -16,7 +16,7 @@ class DhikrRepository(
         private set
 
     fun load() {
-        state = store.load() ?: SavedState()
+        state = store.load()?.withIndependentTahlilProgress() ?: SavedState()
     }
 
     private fun commit(next: SavedState) {
@@ -125,20 +125,7 @@ class DhikrRepository(
     }
 
     fun updateSettings(transform: (Settings) -> Settings) {
-        val settings = transform(state.settings)
-        val goals = if (settings.laIlaTarget100 != state.settings.laIlaTarget100) {
-            val day = todayKey()
-            val target = DhikrEngine.laIlaTarget(settings)
-            state.goals.map { goal ->
-                if (goal.dayKey == day && goal.goalId == Routines.LA_ILA_GOAL_ID) {
-                    goal.copy(
-                        target = target,
-                        satisfiedBy = goal.satisfiedBy?.takeIf { goal.completedCount >= target },
-                    )
-                } else goal
-            }
-        } else state.goals
-        commit(state.copy(settings = settings, goals = goals))
+        commit(state.copy(settings = transform(state.settings)))
     }
 
     // ------------------------------------------------------ backup & restore
@@ -148,7 +135,36 @@ class DhikrRepository(
     /** Restores from exported text; returns false when the text is not valid state. */
     fun restore(text: String): Boolean {
         val decoded = SavedStateCodec.decode(text) ?: return false
-        commit(decoded)
+        commit(decoded.withIndependentTahlilProgress())
         return true
     }
+}
+
+/** Move each prayer's recorded share of the old goal to its own progress row. */
+private fun SavedState.withIndependentTahlilProgress(): SavedState {
+    val legacyGoals = goals.filter { it.goalId == "goal-la-ilaha-illallah" }
+    if (legacyGoals.isEmpty() && !settings.sharedGoalEnabled) return this
+
+    val fajr = RoutineKey(RoutineId.FAJR, 24)
+    val asr = RoutineKey(RoutineId.ASR, 24)
+    val rows = progress.associateByTo(mutableMapOf()) { it.dayKey to it.routineKey }
+    for (goal in legacyGoals) {
+        val total = goal.completedCount.coerceAtLeast(0)
+        var fajrCount = (goal.contributions[fajr.toString()] ?: 0).coerceIn(0, total)
+        var asrCount = (goal.contributions[asr.toString()] ?: 0).coerceIn(0, total - fajrCount)
+        val unattributed = total - fajrCount - asrCount
+        if (goal.satisfiedBy == asr) asrCount += unattributed else fajrCount += unattributed
+        for ((key, count) in listOf(fajr to fajrCount, asr to asrCount)) {
+            if (count == 0) continue
+            val rowKey = goal.dayKey to key
+            val previous = rows[rowKey]
+            val combined = ((previous?.completedCount ?: 0).toLong() + count).coerceAtMost(Int.MAX_VALUE.toLong())
+            rows[rowKey] = DhikrProgress(goal.dayKey, key, Routines.TAHLIL_ID, combined.toInt(), previous?.completedAt)
+        }
+    }
+    return copy(
+        settings = settings.copy(sharedGoalEnabled = false),
+        progress = rows.values.toList(),
+        goals = goals - legacyGoals.toSet(),
+    )
 }

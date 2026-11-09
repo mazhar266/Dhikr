@@ -143,12 +143,8 @@ fun SettingsScreen(model: AppModel, modifier: Modifier = Modifier) {
 
             item {
                 SettingsCard(text.dailyGoal) {
-                    SwitchRow(
-                        text.shareGoal,
-                        settings.sharedGoalEnabled,
-                    ) { model.updateSettings { s -> s.copy(sharedGoalEnabled = !s.sharedGoalEnabled) } }
                     Text(
-                        text.goalShared(settings.sharedGoalEnabled),
+                        text.tahlilTargetDescription,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

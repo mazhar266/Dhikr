@@ -14,13 +14,7 @@ data class DhikrProgress(
 )
 
 /**
- * A shared daily goal: a single repetition target that can be satisfied by
- * recitations in one or more routines (e.g. the "La Ilaha Illallah" 10/100
- * goal shared between Fajr and Asr).
- *
- * [satisfiedBy] records which routineKey first fulfilled the goal on this day,
- * so we can report an Asr entry as *satisfied via the shared goal* rather than
- * as independently recited in Asr.
+ * Legacy shared daily goal kept for decoding older saves and backups.
  */
 data class SharedDailyGoal(
     val goalId: String,
@@ -30,8 +24,7 @@ data class SharedDailyGoal(
     val applicableRoutineIds: List<RoutineId> = emptyList(),
     val satisfiedBy: RoutineKey? = null,
     /**
-     * Repetitions contributed per routine key, so undo in one routine can
-     * never roll back taps made from another routine.
+     * Repetitions contributed per routine key before counts were separated.
      */
     val contributions: Map<String, Int> = emptyMap(),
 )

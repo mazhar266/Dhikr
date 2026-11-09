@@ -17,7 +17,6 @@ interface UiText {
     val unfinishedOnly: String
     val recited: String
     val once: String
-    val sharedGoal: String
     val done: String
     val entryNotFound: String
     val prev: String
@@ -68,7 +67,6 @@ interface UiText {
     val hapticFeedback: String
     val autoAdvance: String
     val dailyGoal: String
-    val shareGoal: String
     val target: String
     val dailyReset: String
     val resetExplain: String
@@ -97,7 +95,7 @@ interface UiText {
     fun entryCount(completed: Int, total: Int, percent: String): String
     fun entryPosition(position: Int): String
     fun remaining(title: String, count: Int): String
-    fun goalShared(on: Boolean): String
+    val tahlilTargetDescription: String
     fun backupFailed(detail: String?): String
     fun restoreFailed(detail: String?): String
 }
@@ -119,7 +117,6 @@ private object EnglishUi : UiText {
     override val unfinishedOnly = "Unfinished only"
     override val recited = "Recited"
     override val once = "Once"
-    override val sharedGoal = "shared goal"
     override val done = "Done"
     override val entryNotFound = "Entry not found"
     override val prev = " Prev"
@@ -170,7 +167,6 @@ private object EnglishUi : UiText {
     override val hapticFeedback = "Haptic feedback"
     override val autoAdvance = "Auto-advance after completing an entry"
     override val dailyGoal = "La ilaha illallah daily goal"
-    override val shareGoal = "Share between Fajr and Asr"
     override val target = "Target"
     override val dailyReset = "Daily reset"
     override val resetExplain = "Progress resets automatically at local midnight. Previous days are kept as history."
@@ -202,11 +198,7 @@ private object EnglishUi : UiText {
     override fun entryCount(completed: Int, total: Int, percent: String) = "$completed / $total entries · $percent"
     override fun entryPosition(position: Int) = "Entry $position"
     override fun remaining(title: String, count: Int) = "$title — $count remaining"
-    override fun goalShared(on: Boolean) = if (on) {
-        "One shared daily goal: completing it in either prayer satisfies both entries."
-    } else {
-        "Independent: Fajr and Asr count their own repetitions."
-    }
+    override val tahlilTargetDescription = "10× in Fajr and Asr, counted separately. 100× in Fajr only."
     override fun backupFailed(detail: String?) = "Backup failed: $detail"
     override fun restoreFailed(detail: String?) = "Restore failed: $detail"
 }
@@ -225,7 +217,6 @@ private object BanglaUi : UiText {
     override val unfinishedOnly = "শুধু বাকি"
     override val recited = "পড়েছি"
     override val once = "একবার"
-    override val sharedGoal = "একত্র লক্ষ্য"
     override val done = "শেষ"
     override val entryNotFound = "এন্ট্রি পাওয়া যায়নি"
     override val prev = " আগে"
@@ -276,7 +267,6 @@ private object BanglaUi : UiText {
     override val hapticFeedback = "কম্পন"
     override val autoAdvance = "একটি শেষ হলে পরেরটিতে যান"
     override val dailyGoal = "লা ইলাহা ইল্লাল্লাহ — দৈনিক লক্ষ্য"
-    override val shareGoal = "ফজর ও আসরের মধ্যে ভাগ করুন"
     override val target = "লক্ষ্য"
     override val dailyReset = "দৈনিক রিসেট"
     override val resetExplain = "স্থানীয় মধ্যরাতে অগ্রগতি নিজে থেকে মুছে যায়। আগের দিনগুলো ইতিহাস হিসেবে থাকে।"
@@ -308,11 +298,7 @@ private object BanglaUi : UiText {
     override fun entryCount(completed: Int, total: Int, percent: String) = "$completed / $total টি · $percent"
     override fun entryPosition(position: Int) = "এন্ট্রি $position"
     override fun remaining(title: String, count: Int) = "$title — $count টি বাকি"
-    override fun goalShared(on: Boolean) = if (on) {
-        "একটি ভাগাভাগি লক্ষ্য: যেকোনো এক ওয়াক্তে শেষ করলে দুটি এন্ট্রিই পূর্ণ হয়।"
-    } else {
-        "আলাদা: ফজর ও আসর নিজ নিজ গণনা রাখে।"
-    }
+    override val tahlilTargetDescription = "১০ বার ফজর ও আসরে আলাদাভাবে। ১০০ বার শুধু ফজরে।"
     override fun backupFailed(detail: String?) = "ব্যাকআপ ব্যর্থ: $detail"
     override fun restoreFailed(detail: String?) = "পুনরুদ্ধার ব্যর্থ: $detail"
 }

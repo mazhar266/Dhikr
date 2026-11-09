@@ -44,8 +44,4 @@ data class RoutineEntry(
     val dhikrId: String,
     val target: Int,
     val enabled: Boolean = true,
-    /** When set, this entry is satisfied via a shared daily goal. */
-    val sharedGoalId: String? = null,
-    /** For the shared-goal case: only add to progress if goal not met. */
-    val conditionalOnGoal: Boolean = false,
 )

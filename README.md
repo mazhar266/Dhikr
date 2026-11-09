@@ -1,6 +1,6 @@
 # Dhikr
 
-A quiet, offline-first daily adhkar companion. Six structured routines — Fajr, Dhuhr, Asr, Maghrib, Isha, and Before Sleep — with verified Arabic text, transliteration, translation, gentle repetition counters, persistent daily progress, and an optional shared daily goal between Fajr and Asr.
+A quiet, offline-first daily adhkar companion. Six structured routines — Fajr, Dhuhr, Asr, Maghrib, Isha, and Before Sleep — with verified Arabic text, transliteration, translation, gentle repetition counters, persistent daily progress, and a configurable tahlil target.
 
 No account, no internet, no ads.
 
@@ -10,7 +10,7 @@ No account, no internet, no ads.
 - **Distraction-free reader** with large scalable Arabic, pronunciation (Latin or বাংলা), translation in English or Bangla, sources, and a one-hand counter with haptics and undo
 - **Bangla**: Settings → Language switches the app, the meaning, and the pronunciation
 - **Persistent local progress** that resets at local midnight and keeps history; streaks and a 14-day overview
-- **Shared daily goal** for the "La ilaha illallah" 10×/100× tasbih (Fajr ↔ Asr), or fully independent counting
+- **Tahlil target** of 10× each in Fajr and Asr, or 100× in Fajr only
 - **Four themes**: Light, Sofia Paper (warm parchment), Dark (navy), and OLED (true black)
 - **Backup & restore** to a plain file via the Android share sheet
 - Gregorian + Hijri (Umm al-Qura) dates

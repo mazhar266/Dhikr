@@ -45,7 +45,7 @@ Verse numbering and diacritics are exactly as returned by the dataset; any accid
 | `bismillah-la-yadurru` | Verified | Abu Dawud 5088; Tirmidhi 3601 (sahih) | 3× verified | Morning/evening: verified; after-prayer user-configured |
 | `sayyidul-istighfar` | Verified | Bukhari 6306 | 1× verified | Morning/evening: verified; after-prayer user-configured |
 | `afini-badani` | Both supplications attested | Abu Dawud 5090, hasan in chain per al-Albani | 3× each | The report describes morning and evening recitation. One app repetition covers both supplications |
-| `la-ilaha-illallah-goal` | Verified | Muslim 2693 (10×); Muslim 2691 and Bukhari 6403 (100×) | Both counts are reported | Fajr/Asr placement and sharing are personal |
+| `la-ilaha-illallah-goal` | Verified | Muslim 2693 (10×); Muslim 2691 and Bukhari 6403 (100×) | Both counts are reported | Fajr/Asr placement is personal |
 | `subhanallahi-wabihamdihi-100` | Verified paired wording | Bukhari 6406 for the pair and Bukhari 6405 for the first phrase alone 100× | 100× of the pair is personal | Fajr/Asr placement is personal |
 | `hammi-wal-hazan` | Verified | Bukhari 6369 | 1× personal | Fajr/Asr placement is personal |
 | `ya-hayyu-ya-qayyum` | Verified | Al-Nasa’i, al-Sunan al-Kubra 10405 | 1× verified | Morning/evening: verified; after-prayer user-configured |
@@ -59,12 +59,8 @@ for the days of Tashriq. The app uses that formula in the personal daily routine
 
 ## Routine-level notes
 
-- **Fajr (29 items) / Asr (28 items)**: Asr is the same inventory minus item 29
-  (`ilman-nafian`, Fajr-only) — item 24 in Asr is the *conditional mirror* of the shared daily goal.
-  All after-prayer placements follow the user's personal routine (documented above item by item).
-- **Shared daily goal (`la-ilaha-illallah-goal`)**: off by default; when enabled in Settings,
-  Fajr and Asr share one daily goal (10× or 100×). An Asr entry satisfied only via Fajr's recitation
-  is displayed as complete. Asr can add up to ten repetitions toward an unfinished goal. Each routine can undo only its own contributions.
+- **Fajr (29 items) / Asr (27 or 28 items)**. The tahlil setting gives Fajr and Asr
+  separate 10× entries, or a single 100× entry in Fajr. Beneficial knowledge is Fajr-only.
 - **Dhuhr / Maghrib / Isha (5 items each)** and **Before Sleep (5 items)**: placements verified as
   noted in the tables above.
 - **Bangla**: every catalog entry has a Bengali title, a Bengali-script pronunciation

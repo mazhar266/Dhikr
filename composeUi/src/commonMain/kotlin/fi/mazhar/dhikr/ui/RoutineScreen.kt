@@ -227,14 +227,6 @@ private fun EntryRow(
                             MaterialTheme.colorScheme.onSurfaceVariant
                         },
                     )
-                    if (entry.viaSharedGoal) {
-                        Spacer(Modifier.size(6.dp))
-                        Text(
-                            text.sharedGoal,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.secondary,
-                        )
-                    }
                 }
             }
             Spacer(Modifier.size(10.dp))

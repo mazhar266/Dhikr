@@ -37,7 +37,7 @@ compose.desktop.application {
         // external tooling; MSI/EXE installers would additionally require WiX.
         targetFormats(TargetFormat.AppImage)
         packageName = "Dhikr"
-        packageVersion = "1.2.3"
+        packageVersion = "1.2.4"
         description = "A quiet companion for the daily adhkar"
         vendor = "Mazhar Ahmed"
         copyright = "© 2026 Mazhar Ahmed"

@@ -301,7 +301,7 @@ object DhikrCatalog {
                     grading = "Sahih",
                 ),
             ),
-            notes = "10× or 100× per the user's daily-goal setting; the Fajr/Asr sharing of this goal is a user-configured arrangement.",
+            notes = "The personal setting selects 10× each in Fajr and Asr or 100× in Fajr only.",
         ),
         Dhikr(
             id = "subhanallahi-wabihamdihi-100",

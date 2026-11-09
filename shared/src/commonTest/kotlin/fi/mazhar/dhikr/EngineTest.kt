@@ -116,82 +116,64 @@ class EngineTest {
         assertEquals(100, entryState(state, RoutineId.FAJR, 24).target)
     }
 
-    // ---------------------------------------------------------------- shared goal
-
     @Test
-    fun sharedGoal_off_fajrEntryIndependent_asrEntryRemoved() {
-        val state = SavedState() // sharedGoalEnabled = false by default
-        val fajr = assertNotNull(DhikrEngine.routineState(state, RoutineId.FAJR, day))
-        assertEquals(29, fajr.entries.size)
-        assertFalse(fajr.entries[23].viaSharedGoal)
-
-        val asr = assertNotNull(DhikrEngine.routineState(state, RoutineId.ASR, day))
-        assertEquals(27, asr.entries.size)
-        assertNull(asr.entries.firstOrNull { it.dhikr.id == "la-ilaha-illallah-goal" })
-    }
-
-    @Test
-    fun sharedGoal_on_bothRoutinesMirrorTheGoal() {
-        var state = SavedState().copy(settings = Settings(sharedGoalEnabled = true))
-        assertEquals(29, DhikrEngine.routineState(state, RoutineId.FAJR, day)!!.entries.size)
-        assertEquals(28, DhikrEngine.routineState(state, RoutineId.ASR, day)!!.entries.size)
-
-        repeat(4) { state = DhikrEngine.increment(state, fajrKey(24), day, 0L) }
-        // Fajr shows 4/10, Asr mirror also shows 4/10 (shared view).
-        assertEquals(4, entryState(state, RoutineId.FAJR, 24).count)
-        assertEquals(4, entryState(state, RoutineId.ASR, 24).count)
-
-        // Asr contributes toward the same goal.
-        repeat(6) { state = DhikrEngine.increment(state, asrKey(24), day, 0L) }
-        assertTrue(entryState(state, RoutineId.FAJR, 24).complete)
-        assertTrue(entryState(state, RoutineId.ASR, 24).complete)
-        assertEquals(10, DhikrEngine.goalFor(state, Routines.LA_ILA_GOAL_ID, day)!!.completedCount)
-    }
-
-    @Test
-    fun sharedGoal_asrCannotUndoFajrContributions() {
-        var state = SavedState().copy(settings = Settings(sharedGoalEnabled = true))
-        repeat(10) { state = DhikrEngine.increment(state, fajrKey(24), day, 0L) }
-        assertTrue(entryState(state, RoutineId.FAJR, 24).complete)
-
-        // Undo from Asr: no Fajr contributions there — must not decrement anything.
-        state = DhikrEngine.decrement(state, asrKey(24), day)
-        assertEquals(10, DhikrEngine.goalFor(state, Routines.LA_ILA_GOAL_ID, day)!!.completedCount)
-        assertTrue(entryState(state, RoutineId.FAJR, 24).complete)
-        assertTrue(entryState(state, RoutineId.ASR, 24).complete)
-    }
-
-    @Test
-    fun sharedGoal_asrDoesNotDuplicateCompletedGoal() {
-        var state = SavedState().copy(settings = Settings(sharedGoalEnabled = true))
-        repeat(10) { state = DhikrEngine.increment(state, fajrKey(24), day, 0L) }
-        // Incrementing further from Asr does not overcount the goal.
-        repeat(5) { state = DhikrEngine.increment(state, asrKey(24), day, 0L) }
-        assertEquals(10, DhikrEngine.goalFor(state, Routines.LA_ILA_GOAL_ID, day)!!.completedCount)
-    }
-
-    @Test
-    fun sharedGoal_asrContributesAtMostTenTowardTheHundredTarget() {
-        var state = SavedState(settings = Settings(sharedGoalEnabled = true, laIlaTarget100 = true))
-        repeat(80) { state = DhikrEngine.increment(state, fajrKey(24), day, 0L) }
-        repeat(11) { state = DhikrEngine.increment(state, asrKey(24), day, 0L) }
-        assertEquals(90, entryState(state, RoutineId.FAJR, 24).count)
+    fun tahlil_atTenHasIndependentCountsInBothPrayers() {
+        var state = SavedState()
+        assertEquals(10, entryState(state, RoutineId.FAJR, 24).target)
         assertEquals(10, entryState(state, RoutineId.ASR, 24).target)
-        assertTrue(entryState(state, RoutineId.ASR, 24).complete)
-        assertFalse(entryState(state, RoutineId.FAJR, 24).complete)
-        assertEquals(state, DhikrEngine.markRecited(state, asrKey(24), day, 0L))
+
+        repeat(10) { state = DhikrEngine.increment(state, fajrKey(24), day, 0L) }
+        assertTrue(entryState(state, RoutineId.FAJR, 24).complete)
+        assertEquals(0, entryState(state, RoutineId.ASR, 24).count)
+
+        state = DhikrEngine.increment(state, asrKey(24), day, 0L)
+        assertEquals(1, entryState(state, RoutineId.ASR, 24).count)
+        assertEquals(11, DhikrEngine.totalRepetitions(state, day))
     }
 
     @Test
-    fun sharedGoal_undoOnlyOwnContributions() {
-        var state = SavedState().copy(settings = Settings(sharedGoalEnabled = true))
-        repeat(4) { state = DhikrEngine.increment(state, fajrKey(24), day, 0L) }
-        repeat(6) { state = DhikrEngine.increment(state, asrKey(24), day, 0L) } // goal complete
-        state = DhikrEngine.decrement(state, asrKey(24), day) // undo one Asr tap
-        assertEquals(9, DhikrEngine.goalFor(state, Routines.LA_ILA_GOAL_ID, day)!!.completedCount)
-        assertFalse(entryState(state, RoutineId.FAJR, 24).complete)
-        state = DhikrEngine.decrement(state, fajrKey(24), day)
-        assertEquals(8, DhikrEngine.goalFor(state, Routines.LA_ILA_GOAL_ID, day)!!.completedCount)
+    fun tahlil_atHundredOnlyAppearsInFajrAndKeepsAsrProgress() {
+        val repo = DhikrRepository(InMemoryDhikrStore(), FixedClock(day))
+        repo.increment(fajrKey(24))
+        repo.increment(asrKey(24))
+        repo.updateSettings { it.copy(laIlaTarget100 = true) }
+
+        assertEquals(100, repo.entriesOf(RoutineId.FAJR).first { it.key == fajrKey(24) }.target)
+        assertTrue(repo.entriesOf(RoutineId.ASR).none { it.key == asrKey(24) })
+        repo.increment(asrKey(24))
+
+        repo.updateSettings { it.copy(laIlaTarget100 = false) }
+        assertEquals(1, repo.entriesOf(RoutineId.ASR).first { it.key == asrKey(24) }.count)
+        assertEquals(1, repo.entriesOf(RoutineId.FAJR).first { it.key == fajrKey(24) }.count)
+    }
+
+    @Test
+    fun tahlil_migratesOldSharedCountsOnLoadAndRestore() {
+        val legacy = SavedState(
+            settings = Settings(sharedGoalEnabled = true),
+            progress = listOf(DhikrProgress(day, fajrKey(24), Routines.TAHLIL_ID, 2)),
+            goals = listOf(
+                SharedDailyGoal(
+                    goalId = "goal-la-ilaha-illallah",
+                    dayKey = day,
+                    target = 10,
+                    completedCount = 10,
+                    contributions = mapOf(fajrKey(24).toString() to 4, asrKey(24).toString() to 6),
+                ),
+            ),
+        )
+        val repo = DhikrRepository(InMemoryDhikrStore(legacy), FixedClock(day))
+        repo.load()
+        assertEquals(6, entryState(repo.state, RoutineId.FAJR, 24).count)
+        assertEquals(6, entryState(repo.state, RoutineId.ASR, 24).count)
+        assertTrue(repo.state.goals.isEmpty())
+        assertEquals(12, DhikrEngine.totalRepetitions(repo.state, day))
+
+        val migrated = repo.state
+        assertTrue(repo.restore(SavedStateCodec.encode(legacy)))
+        assertEquals(migrated, repo.state)
+        assertTrue(repo.restore(repo.export()))
+        assertEquals(migrated, repo.state)
     }
 
     // ------------------------------------------------------------------ day logic
@@ -208,14 +190,6 @@ class EngineTest {
 
         // History retained.
         assertEquals(1, state.progress.count { it.dayKey == day })
-    }
-
-    @Test
-    fun totalRepetitions_countSharedGoalOnce() {
-        var state = SavedState().copy(settings = Settings(sharedGoalEnabled = true))
-        repeat(3) { state = DhikrEngine.increment(state, fajrKey(24), day, 0L) }
-        state = DhikrEngine.increment(state, fajrKey(12), day, 0L)
-        assertEquals(4, DhikrEngine.totalRepetitions(state, day))
     }
 
     @Test

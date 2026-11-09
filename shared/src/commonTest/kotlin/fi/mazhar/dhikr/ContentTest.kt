@@ -133,11 +133,8 @@ class ContentTest {
             fajrSequence.drop(24).dropLast(1)
         assertEquals(expected.map { it.first }, asr.entries.map { it.dhikrId })
         assertEquals(28, asr.entries.size)
-        // Item 24 in Asr is the conditional mirror of the shared goal.
-        val conditional = asr.entries[23]
-        assertTrue(conditional.conditionalOnGoal)
-        assertEquals(Routines.LA_ILA_GOAL_ID, conditional.sharedGoalId)
-        assertEquals(Routines.LA_ILA_GOAL_ID, asr.entries[23].sharedGoalId)
+        assertEquals(Routines.byId(RoutineId.FAJR)!!.entries[23].dhikrId, asr.entries[23].dhikrId)
+        assertEquals(RoutineKey(RoutineId.ASR, 24), asr.entries[23].key)
     }
 
     @Test
@@ -176,20 +173,6 @@ class ContentTest {
                 )
             }
         }
-    }
-
-    @Test
-    fun sharedGoal_isWiredToFajrAndAsr() {
-        assertEquals(
-            listOf(RoutineId.FAJR, RoutineId.ASR),
-            Routines.routinesForGoal(Routines.LA_ILA_GOAL_ID),
-        )
-        // Only the Asr entry is conditional.
-        val conditionalEntries = Routines.all
-            .flatMap { it.entries }
-            .filter { it.conditionalOnGoal }
-        assertEquals(1, conditionalEntries.size)
-        assertEquals(RoutineId.ASR, conditionalEntries[0].key.routineId)
     }
 
     @Test

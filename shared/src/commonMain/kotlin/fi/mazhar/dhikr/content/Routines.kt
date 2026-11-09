@@ -29,19 +29,10 @@ data class RoutineDefinition(
 
 object Routines {
 
-    /** Shared daily goal: the "La ilaha illallah" 10×/100× tasbih (Fajr ↔ Asr). */
-    const val LA_ILA_GOAL_ID = "goal-la-ilaha-illallah"
+    internal const val TAHLIL_ID = "la-ilaha-illallah-goal"
 
     private fun entry(routine: RoutineId, order: Int, dhikrId: String, target: Int) =
         RoutineEntry(key = fi.mazhar.dhikr.RoutineKey(routine, order), dhikrId = dhikrId, target = target)
-
-    private fun laIlaEntry(routine: RoutineId, order: Int, conditional: Boolean) = RoutineEntry(
-        key = fi.mazhar.dhikr.RoutineKey(routine, order),
-        dhikrId = "la-ilaha-illallah-goal",
-        target = 10, // default; effective target follows Settings.laIlaTarget100
-        sharedGoalId = LA_ILA_GOAL_ID,
-        conditionalOnGoal = conditional,
-    )
 
     private val fajrEntries: List<RoutineEntry> = listOf(
         entry(RoutineId.FAJR, 1, "allahu-akbar", 1),
@@ -67,7 +58,7 @@ object Routines {
         entry(RoutineId.FAJR, 21, "bismillah-la-yadurru", 3),
         entry(RoutineId.FAJR, 22, "sayyidul-istighfar", 1),
         entry(RoutineId.FAJR, 23, "afini-badani", 3),
-        laIlaEntry(RoutineId.FAJR, 24, conditional = false),
+        entry(RoutineId.FAJR, 24, TAHLIL_ID, 10),
         entry(RoutineId.FAJR, 25, "subhanallahi-wabihamdihi-100", 100),
         entry(RoutineId.FAJR, 26, "astaghfirullah", 100),
         entry(RoutineId.FAJR, 27, "hammi-wal-hazan", 1),
@@ -75,16 +66,10 @@ object Routines {
         entry(RoutineId.FAJR, 29, "ilman-nafian", 1),
     )
 
-    /**
-     * Asr = Fajr items 1–23 (re-keyed to ASR so progress never merges across
-     * routines), the conditional shared-goal item 24, then items 25–28.
-     * Fajr item 29 (beneficial knowledge) is Fajr-only per the inventory.
-     */
-    private val asrEntries: List<RoutineEntry> =
-        fajrEntries.take(23).map { it.copy(key = fi.mazhar.dhikr.RoutineKey(RoutineId.ASR, it.key.order)) } +
-            laIlaEntry(RoutineId.ASR, 24, conditional = true) +
-            fajrEntries.drop(24).dropLast(1)
-                .map { it.copy(key = fi.mazhar.dhikr.RoutineKey(RoutineId.ASR, it.key.order)) }
+    // Asr reuses Fajr's content and has its own progress keys.
+    private val asrEntries = fajrEntries.dropLast(1).map {
+        it.copy(key = fi.mazhar.dhikr.RoutineKey(RoutineId.ASR, it.key.order))
+    }
 
     private fun shortRoutine(
         id: RoutineId,
@@ -153,8 +138,4 @@ object Routines {
     val all: List<RoutineDefinition> get() = items
 
     fun byId(id: RoutineId): RoutineDefinition? = byId[id]
-
-    /** Routines that contain an entry wired to the given shared goal id. */
-    fun routinesForGoal(goalId: String): List<RoutineId> =
-        items.filter { def -> def.entries.any { it.sharedGoalId == goalId } }.map { it.id }
 }
