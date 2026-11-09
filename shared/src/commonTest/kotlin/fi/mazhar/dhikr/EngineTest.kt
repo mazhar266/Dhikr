@@ -171,6 +171,18 @@ class EngineTest {
     }
 
     @Test
+    fun sharedGoal_asrContributesAtMostTenTowardTheHundredTarget() {
+        var state = SavedState(settings = Settings(sharedGoalEnabled = true, laIlaTarget100 = true))
+        repeat(80) { state = DhikrEngine.increment(state, fajrKey(24), day, 0L) }
+        repeat(11) { state = DhikrEngine.increment(state, asrKey(24), day, 0L) }
+        assertEquals(90, entryState(state, RoutineId.FAJR, 24).count)
+        assertEquals(10, entryState(state, RoutineId.ASR, 24).target)
+        assertTrue(entryState(state, RoutineId.ASR, 24).complete)
+        assertFalse(entryState(state, RoutineId.FAJR, 24).complete)
+        assertEquals(state, DhikrEngine.markRecited(state, asrKey(24), day, 0L))
+    }
+
+    @Test
     fun sharedGoal_undoOnlyOwnContributions() {
         var state = SavedState().copy(settings = Settings(sharedGoalEnabled = true))
         repeat(4) { state = DhikrEngine.increment(state, fajrKey(24), day, 0L) }

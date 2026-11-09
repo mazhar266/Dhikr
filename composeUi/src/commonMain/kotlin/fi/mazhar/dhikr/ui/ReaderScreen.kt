@@ -233,8 +233,10 @@ private fun Controls(
                 Text(text.prev)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onEditTarget) {
-                    Icon(Icons.Filled.TextFields, contentDescription = text.changeTarget)
+                if (entry.dhikr.id != "la-ilaha-illallah-goal") {
+                    IconButton(onClick = onEditTarget) {
+                        Icon(Icons.Filled.TextFields, contentDescription = text.changeTarget)
+                    }
                 }
                 Text(
                     text.entryPosition(entry.position),

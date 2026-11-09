@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import fi.mazhar.dhikr.DhikrCategory
 import fi.mazhar.dhikr.EntryUiState
 import fi.mazhar.dhikr.RoutineId
 import fi.mazhar.dhikr.pronunciationFor
@@ -120,7 +121,8 @@ private fun EntryRow(
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                 )
-                if (pronunciation != null) {
+                val isQuran = entry.dhikr.category == DhikrCategory.QURAN
+                if (pronunciation != null && !isQuran) {
                     Text(
                         pronunciation,
                         style = MaterialTheme.typography.bodySmall,
@@ -130,7 +132,7 @@ private fun EntryRow(
                     )
                 }
                 Text(
-                    entry.dhikr.arabic,
+                    if (isQuran) entry.dhikr.arabicTitle.orEmpty() else entry.dhikr.arabic,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textDirection = TextDirection.Content,

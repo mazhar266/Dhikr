@@ -69,7 +69,7 @@ object Routines {
         entry(RoutineId.FAJR, 23, "afini-badani", 3),
         laIlaEntry(RoutineId.FAJR, 24, conditional = false),
         entry(RoutineId.FAJR, 25, "subhanallahi-wabihamdihi-100", 100),
-        entry(RoutineId.FAJR, 26, "istighfar-100", 100),
+        entry(RoutineId.FAJR, 26, "astaghfirullah", 100),
         entry(RoutineId.FAJR, 27, "hammi-wal-hazan", 1),
         entry(RoutineId.FAJR, 28, "ya-hayyu-ya-qayyum", 1),
         entry(RoutineId.FAJR, 29, "ilman-nafian", 1),

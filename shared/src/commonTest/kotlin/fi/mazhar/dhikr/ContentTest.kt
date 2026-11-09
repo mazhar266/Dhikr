@@ -39,7 +39,7 @@ class ContentTest {
         "afini-badani" to 3,
         "la-ilaha-illallah-goal" to 10,
         "subhanallahi-wabihamdihi-100" to 100,
-        "istighfar-100" to 100,
+        "astaghfirullah" to 100,
         "hammi-wal-hazan" to 1,
         "ya-hayyu-ya-qayyum" to 1,
         "ilman-nafian" to 1,
@@ -58,6 +58,7 @@ class ContentTest {
             assertTrue(d.transliteration.isNotBlank(), "${d.id}: transliteration blank")
             assertTrue(!d.transliteration.contains('…'), "${d.id}: pronunciation is truncated")
             assertTrue(d.translation.isNotBlank(), "${d.id}: translation blank")
+            assertTrue(!d.translation.contains('…'), "${d.id}: translation is truncated")
             assertTrue(d.title.isNotBlank(), "${d.id}: title blank")
             assertTrue(d.titleBn?.isNotBlank() == true, "${d.id}: Bangla title blank")
             assertTrue(d.pronunciationBn?.any { it in '\u0980'..'\u09FF' } == true, "${d.id}: Bangla pronunciation missing")
@@ -196,6 +197,6 @@ class ContentTest {
         val unverified = DhikrCatalog.all
             .filter { it.verification == VerificationStatus.NEEDS_VERIFICATION }
             .map { it.id }
-        assertEquals(listOf("takbir-tahlil-after-salam"), unverified)
+        assertEquals(listOf("ajirni-minan-nar", "audhu-kalimat-ghadab"), unverified)
     }
 }

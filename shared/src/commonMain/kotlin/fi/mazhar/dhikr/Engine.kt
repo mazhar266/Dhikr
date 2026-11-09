@@ -74,10 +74,10 @@ object DhikrEngine {
         }
 
     fun targetFor(entry: RoutineEntry, state: SavedState): Int {
-        state.targetOverrides[entry.key.toString()]?.let { return it }
         if (entry.dhikrId == "la-ilaha-illallah-goal") {
             return laIlaTarget(state.settings)
         }
+        state.targetOverrides[entry.key.toString()]?.let { return it }
         return entry.target
     }
 
@@ -95,9 +95,15 @@ object DhikrEngine {
             val dhikr = DhikrCatalog.byId(entry.dhikrId)
                 ?: error("Catalog missing dhikr '${entry.dhikrId}' (entry ${entry.key})")
             val goal = entry.sharedGoalId?.let { goalFor(state, it, dayKey) }
-            val count = goal?.completedCount
-                ?: progressFor(state, entry.key, dayKey)?.completedCount ?: 0
-            val target = goal?.target ?: targetFor(entry, state)
+            val goalTarget = goal?.target ?: targetFor(entry, state)
+            val cappedContribution = entry.conditionalOnGoal && goalTarget > entry.target
+            val target = if (cappedContribution) entry.target else goalTarget
+            val count = if (cappedContribution) {
+                if (goal != null && goal.completedCount >= goal.target) target
+                else goal?.contributions?.get(entry.key.toString())?.coerceAtMost(target) ?: 0
+            } else {
+                goal?.completedCount ?: progressFor(state, entry.key, dayKey)?.completedCount ?: 0
+            }
             EntryUiState(
                 key = entry.key,
                 dhikr = dhikr,
@@ -192,7 +198,7 @@ object DhikrEngine {
             target = targetFor(entry, state),
             applicableRoutineIds = Routines.routinesForGoal(goalId),
         )
-        if (goal.completedCount >= goal.target) return state
+        if (remainingGoalContribution(entry, goal) <= 0) return state
 
         val keyStr = entry.key.toString()
         val updated = goal.copy(
@@ -252,12 +258,13 @@ object DhikrEngine {
                 target = targetFor(entry, state),
                 applicableRoutineIds = Routines.routinesForGoal(goalId),
             )
-            if (goal.completedCount >= goal.target) return state
-            val delta = goal.target - goal.completedCount
+            val delta = remainingGoalContribution(entry, goal)
+            if (delta <= 0) return state
             val keyStr = key.toString()
+            val newCount = goal.completedCount + delta
             val updated = goal.copy(
-                completedCount = goal.target,
-                satisfiedBy = entry.key,
+                completedCount = newCount,
+                satisfiedBy = if (newCount >= goal.target) entry.key else goal.satisfiedBy,
                 contributions = goal.contributions + (keyStr to (goal.contributions[keyStr] ?: 0) + delta),
             )
             state.copy(goals = state.goals.filterNot { it == existing } + updated)
@@ -274,6 +281,13 @@ object DhikrEngine {
             )
             state.copy(progress = state.progress.filterNot { it == existing } + row)
         }
+    }
+
+    private fun remainingGoalContribution(entry: RoutineEntry, goal: SharedDailyGoal): Int {
+        val remaining = goal.target - goal.completedCount
+        if (!entry.conditionalOnGoal) return remaining
+        val contributed = goal.contributions[entry.key.toString()] ?: 0
+        return minOf(remaining, entry.target - contributed)
     }
 
     fun setTarget(state: SavedState, key: RoutineKey, target: Int): SavedState {

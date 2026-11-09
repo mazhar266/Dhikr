@@ -1,5 +1,7 @@
 package fi.mazhar.dhikr
 
+import fi.mazhar.dhikr.content.Routines
+
 /**
  * Facade tying the canonical content, the engine, and a [DhikrStore] together.
  * Every mutation is persisted immediately, so counts survive process death
@@ -68,7 +70,20 @@ class DhikrRepository(
     }
 
     fun updateSettings(transform: (Settings) -> Settings) {
-        commit(state.copy(settings = transform(state.settings)))
+        val settings = transform(state.settings)
+        val goals = if (settings.laIlaTarget100 != state.settings.laIlaTarget100) {
+            val day = todayKey()
+            val target = DhikrEngine.laIlaTarget(settings)
+            state.goals.map { goal ->
+                if (goal.dayKey == day && goal.goalId == Routines.LA_ILA_GOAL_ID) {
+                    goal.copy(
+                        target = target,
+                        satisfiedBy = goal.satisfiedBy?.takeIf { goal.completedCount >= target },
+                    )
+                } else goal
+            }
+        } else state.goals
+        commit(state.copy(settings = settings, goals = goals))
     }
 
     // ------------------------------------------------------ backup & restore
