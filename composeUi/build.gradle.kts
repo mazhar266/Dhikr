@@ -18,7 +18,7 @@ afterEvaluate {
 
 android {
     namespace = "fi.mazhar.dhikr.composeui"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         minSdk = 24
     }

@@ -25,13 +25,13 @@ afterEvaluate {
 
 android {
     namespace = "fi.mazhar.dhikr.android"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "fi.mazhar.dhikr"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 6
+        targetSdk = 36
+        versionCode = 7
         versionName = "1.2.3"
     }
 

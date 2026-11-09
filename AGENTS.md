@@ -19,12 +19,12 @@ Kotlin Multiplatform app (Dhikr). Four Gradle modules (root `build.gradle.kts` l
 
 ## Environment gotchas (non-obvious)
 - **No system Java.** The build is pinned to `org.gradle.java.home=C:\Users\mazha\.jdks\temurin-21` in `gradle.properties`. If that path disappears, `.\gradlew` fails with "JAVA_HOME is not set". Bare shells (and agents) must also `export JAVA_HOME=C:/Users/mazha/.jdks/temurin-21` *before* invoking `gradlew` — the wrapper itself needs a JVM; `org.gradle.java.home` only applies after Gradle starts.
-- **AGP/KGP version warning is expected and harmless.** AGP 8.7.3 is above KGP 2.0.21's tested max (8.5). Ignore the "higher than the maximum known" warning unless it turns into an error.
+- **Android API 36 uses AGP 8.11.1 and Kotlin 2.2.20.** The Android app and libraries compile against API 36. The app also targets API 36 for Google Play submissions.
 - **JVM target is pinned to 17** in `shared`, `composeUi`, `desktopApp`, and `androidApp` (each build file pins `KotlinJvmCompile`). Do not let Kotlin default to 21 — it fails with "Inconsistent JVM-target compatibility".
 - `android.useAndroidX=true` is required (set in `gradle.properties`).
 
 ## Conventions / gotchas
-- `expect`/`actual` `Platform` class is **Beta** in Kotlin 2.0 — the warning is expected; leave it.
+- `expect`/`actual` `Platform` class is **Beta** — the warning is expected; leave it.
 - Adding a `nodejs()` target reintroduces the `nodejs.org` dist-repo conflict with `PREFER_SETTINGS`. Keep JS/Web browser-only.
 - `local.properties` (ignored) points `sdk.dir` at the Android SDK — needed for Android builds but not for shared-only tasks.
 - **`shared/` must stay dependency-free and platform-neutral.** No `String.format` / `java.time` in its commonMain (they don't exist on JS/Wasm; use `DayKeys`-style helpers). On wasmJs, JS interop uses `@kotlin.JsFun("...")` on `external fun`s. `composeUi/` commonMain is compiled for iOS too, so it must equally stay free of `java.*`/`android.*`; platform APIs belong in `iosMain`/the app modules. (`NSDateComponents` is an ObjC class, **not** a C struct — never `useContents` on it.)
