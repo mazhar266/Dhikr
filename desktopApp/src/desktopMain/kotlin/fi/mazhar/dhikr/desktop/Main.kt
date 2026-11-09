@@ -14,6 +14,7 @@ import fi.mazhar.dhikr.ui.AppModel
 import fi.mazhar.dhikr.ui.DhikrApp
 import fi.mazhar.dhikr.ui.LocalAppPlatform
 import java.io.File
+import java.nio.file.Files
 import javax.imageio.ImageIO
 
 fun main() {
@@ -56,6 +57,7 @@ class FileDhikrStore(private val file: File) : fi.mazhar.dhikr.DhikrStore {
     }
 
     override fun save(state: fi.mazhar.dhikr.SavedState) {
+        Files.createDirectories(file.absoluteFile.parentFile.toPath())
         val tmp = File(file.parentFile, file.name + ".tmp")
         tmp.writeText(fi.mazhar.dhikr.SavedStateCodec.encode(state), Charsets.UTF_8)
         if (!tmp.renameTo(file)) {
