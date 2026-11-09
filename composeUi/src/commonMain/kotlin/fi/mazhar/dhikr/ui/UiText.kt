@@ -22,7 +22,16 @@ interface UiText {
     val entryNotFound: String
     val prev: String
     val next: String
-    val changeTarget: String
+    val personalLists: String
+    val newPersonalList: String
+    val renamePersonalList: String
+    val personalListName: String
+    val addPersonalDhikr: String
+    val editPersonalDhikr: String
+    val removePersonalDhikr: String
+    val removePersonalDhikrMessage: String
+    val personalDhikrFields: String
+    val arabic: String
     val undo: String
     val markAsRecited: String
     val tapToCount: String
@@ -113,7 +122,16 @@ private object EnglishUi : UiText {
     override val entryNotFound = "Entry not found"
     override val prev = " Prev"
     override val next = "Next "
-    override val changeTarget = "Change target"
+    override val personalLists = "My lists"
+    override val newPersonalList = "New list"
+    override val renamePersonalList = "Rename list"
+    override val personalListName = "List name"
+    override val addPersonalDhikr = "Add dhikr"
+    override val editPersonalDhikr = "Edit dhikr"
+    override val removePersonalDhikr = "Remove dhikr"
+    override val removePersonalDhikrMessage = "This removes the dhikr and its recorded progress from this list."
+    override val personalDhikrFields = "Enter at least one of these three fields."
+    override val arabic = "Arabic"
     override val undo = "Undo"
     override val markAsRecited = "Mark as Recited"
     override val tapToCount = "tap to count"
@@ -208,7 +226,16 @@ private object BanglaUi : UiText {
     override val entryNotFound = "এন্ট্রি পাওয়া যায়নি"
     override val prev = " আগে"
     override val next = "পরে "
-    override val changeTarget = "লক্ষ্য বদলান"
+    override val personalLists = "আমার তালিকা"
+    override val newPersonalList = "নতুন তালিকা"
+    override val renamePersonalList = "তালিকার নাম বদলান"
+    override val personalListName = "তালিকার নাম"
+    override val addPersonalDhikr = "যিকির যোগ করুন"
+    override val editPersonalDhikr = "যিকির সম্পাদনা করুন"
+    override val removePersonalDhikr = "যিকির সরান"
+    override val removePersonalDhikrMessage = "এই তালিকা থেকে যিকিরটি ও তার সংরক্ষিত অগ্রগতি মুছে যাবে।"
+    override val personalDhikrFields = "এই তিনটি ঘরের অন্তত একটি পূরণ করুন।"
+    override val arabic = "আরবি"
     override val undo = "আগেরটা বাতিল"
     override val markAsRecited = "পড়া হয়েছে"
     override val tapToCount = "গুণতে চাপুন"

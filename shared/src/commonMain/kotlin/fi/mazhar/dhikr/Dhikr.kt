@@ -26,6 +26,7 @@ enum class DhikrCategory {
 enum class VerificationStatus {
     VERIFIED,
     NEEDS_VERIFICATION,
+    USER_PROVIDED,
 }
 
 /** A citation (Qur'an, Hadith, or other source). */

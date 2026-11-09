@@ -3,8 +3,7 @@ package fi.mazhar.dhikr
 /**
  * Fully serializable app state (everything that must survive process death).
  * The canonical dhikr catalog / routines are *not* stored here — they are
- * bundled content. Only progress, shared goals, target overrides, and
- * settings are persisted.
+ * bundled content. Personal lists are persisted with progress and settings.
  */
 data class SavedState(
     val settings: Settings = Settings(),
@@ -14,6 +13,7 @@ data class SavedState(
     val targetOverrides: Map<String, Int> = emptyMap(),
     /** Most recently opened routine, for the "resume" card. */
     val lastOpenedRoutine: RoutineId? = null,
+    val personalRoutines: List<PersonalRoutine> = emptyList(),
 )
 
 /**
@@ -40,14 +40,21 @@ class InMemoryDhikrStore(initial: SavedState? = null) : DhikrStore {
  * Versioned, line-based codec for [SavedState]. Deliberately dependency-free
  * so it works identically on every KMP target and in the JVM test suite.
  *
- * Persisted fields are constrained (day keys, enum names, slug ids, numbers),
- * so no escaping is required; unknown or malformed lines are skipped for
- * forward compatibility.
+ * Personal text fields escape separators and line breaks. Unknown or
+ * malformed lines are skipped for forward compatibility.
  */
 object SavedStateCodec {
 
     private const val HEADER = "DHIKR_STATE_V1"
     private const val SEP = "|"
+    private val escapedText = Regex("%(25|7C|0D|0A)")
+
+    private fun escape(text: String): String =
+        text.replace("%", "%25").replace("|", "%7C").replace("\r", "%0D").replace("\n", "%0A")
+
+    private fun unescape(text: String): String = escapedText.replace(text) {
+        it.groupValues[1].toInt(16).toChar().toString()
+    }
 
     fun encode(state: SavedState): String = buildString {
         appendLine(HEADER)
@@ -68,6 +75,15 @@ object SavedStateCodec {
         )
         for (entry in state.targetOverrides.entries.sortedBy { it.key }) {
             appendLine(listOf("T", entry.key, entry.value).joinToString(SEP))
+        }
+        for (routine in state.personalRoutines) {
+            appendLine(listOf("L", routine.id.name, escape(routine.title)).joinToString(SEP))
+            for (entry in routine.entries) {
+                appendLine(listOf(
+                    "D", routine.id.name, entry.order, entry.target,
+                    escape(entry.arabic), escape(entry.pronunciation), escape(entry.meaning),
+                ).joinToString(SEP))
+            }
         }
         for (p in state.progress) {
             appendLine(
@@ -108,10 +124,29 @@ object SavedStateCodec {
         val overrides = LinkedHashMap<String, Int>()
         val progress = ArrayList<DhikrProgress>()
         val goals = ArrayList<SharedDailyGoal>()
+        val personalRoutines = LinkedHashMap<RoutineId, PersonalRoutine>()
+        val personalEntries = mutableMapOf<RoutineId, MutableMap<Int, PersonalDhikr>>()
 
         for (line in lines.drop(1)) {
             val f = line.split(SEP)
             when (f[0]) {
+                "L" -> if (f.size == 3) runCatching {
+                    val id = RoutineId.valueOf(f[1])
+                    val title = unescape(f[2]).trim()
+                    if (id.isPersonal && title.isNotEmpty()) personalRoutines[id] = PersonalRoutine(id, title)
+                }
+                "D" -> if (f.size == 7) runCatching {
+                    val id = RoutineId.valueOf(f[1])
+                    val order = f[2].toInt()
+                    val target = f[3].toInt()
+                    val (arabic, pronunciation, meaning) = f.subList(4, 7).map { unescape(it).trim() }
+                    if (id.isPersonal && order > 0 && target > 0 &&
+                        (arabic.isNotBlank() || pronunciation.isNotBlank() || meaning.isNotBlank())
+                    ) {
+                        personalEntries.getOrPut(id) { LinkedHashMap() }[order] =
+                            PersonalDhikr(order, arabic, pronunciation, meaning, target)
+                    }
+                }
                 "S" -> if (f.size >= 11) runCatching {
                     settings = Settings(
                         theme = AppTheme.valueOf(f[1]),
@@ -174,6 +209,9 @@ object SavedStateCodec {
             goals = goals,
             targetOverrides = overrides,
             lastOpenedRoutine = lastOpened,
+            personalRoutines = personalRoutines.values.map { routine ->
+                routine.copy(entries = personalEntries[routine.id]?.values?.toList().orEmpty())
+            },
         )
     }
 

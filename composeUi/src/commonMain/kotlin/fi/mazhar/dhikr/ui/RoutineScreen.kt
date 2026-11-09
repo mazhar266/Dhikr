@@ -16,15 +16,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +49,35 @@ fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Mo
     var unfinishedOnly by remember { mutableStateOf(false) }
     val settings = model.state.settings
     val text = uiText(settings.translationLanguage)
+    val personal = model.state.personalRoutines.firstOrNull { it.id == routineId }
+    var renaming by rememberSaveable(routineId.name) { mutableStateOf(false) }
+    var editingOrder by rememberSaveable(routineId.name) { mutableStateOf<Int?>(null) }
+
+    if (personal != null && renaming) {
+        PersonalListNameDialog(text, personal.title, onDismiss = { renaming = false }) { name ->
+            model.renamePersonalRoutine(routineId, name)
+            renaming = false
+        }
+    }
+    if (personal != null) {
+        editingOrder?.let { order ->
+            val initial = personal.entries.firstOrNull { it.order == order }
+            if (order == 0 || initial != null) {
+                PersonalDhikrDialog(
+                    text = text,
+                    initial = initial,
+                    onDismiss = { editingOrder = null },
+                    onRemove = {
+                        model.removePersonalDhikr(routineId, order)
+                        editingOrder = null
+                    },
+                ) { arabic, pronunciation, meaning, target ->
+                    model.savePersonalDhikr(routineId, initial?.order, arabic, pronunciation, meaning, target)
+                    editingOrder = null
+                }
+            }
+        }
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         if (routine == null) {
@@ -58,11 +92,15 @@ fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Mo
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                routine.arabicTitle,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            if (personal == null) {
+                Text(
+                    routine.arabicTitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            } else {
+                TextButton(onClick = { renaming = true }) { Text(text.renamePersonalList) }
+            }
             FilterChip(
                 selected = unfinishedOnly,
                 onClick = { unfinishedOnly = !unfinishedOnly },
@@ -75,6 +113,13 @@ fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Mo
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            if (personal != null) {
+                item {
+                    OutlinedButton(onClick = { editingOrder = 0 }, modifier = Modifier.fillMaxWidth()) {
+                        Text(text.addPersonalDhikr)
+                    }
+                }
+            }
             items(entries, key = { it.key.toString() }) { entry ->
                 EntryRow(
                     entry = entry,
@@ -85,6 +130,7 @@ fun RoutineScreen(model: AppModel, routineId: RoutineId, modifier: Modifier = Mo
                         null
                     },
                     text = text,
+                    onEdit = if (personal != null) ({ editingOrder = entry.key.order }) else null,
                 ) { model.openReader(routineId, entry.key.order) }
             }
             item { Spacer(Modifier.height(24.dp)) }
@@ -98,6 +144,7 @@ private fun EntryRow(
     title: String,
     pronunciation: String?,
     text: UiText,
+    onEdit: (() -> Unit)?,
     onClick: () -> Unit,
 ) {
     Card(
@@ -122,7 +169,8 @@ private fun EntryRow(
                     fontWeight = FontWeight.SemiBold,
                 )
                 val isQuran = entry.dhikr.category == DhikrCategory.QURAN
-                if (pronunciation != null && !isQuran) {
+                val personal = entry.key.routineId.isPersonal
+                if (!personal && pronunciation != null && !isQuran) {
                     Text(
                         pronunciation,
                         style = MaterialTheme.typography.bodySmall,
@@ -131,16 +179,18 @@ private fun EntryRow(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Text(
-                    if (isQuran) entry.dhikr.arabicTitle.orEmpty() else entry.dhikr.arabic,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textDirection = TextDirection.Content,
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(vertical = 2.dp),
-                )
+                if (!personal) {
+                    Text(
+                        if (isQuran) entry.dhikr.arabicTitle.orEmpty() else entry.dhikr.arabic,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textDirection = TextDirection.Content,
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(vertical = 2.dp),
+                    )
+                }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         if (entry.target == 1) {
@@ -180,6 +230,11 @@ private fun EntryRow(
                     tint = MaterialTheme.colorScheme.outline,
                     modifier = Modifier.size(24.dp),
                 )
+            }
+            if (onEdit != null) {
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Filled.Edit, contentDescription = text.editPersonalDhikr)
+                }
             }
         }
     }

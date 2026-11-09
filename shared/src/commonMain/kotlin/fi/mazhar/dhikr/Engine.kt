@@ -54,6 +54,12 @@ data class DaySummary(
  */
 object DhikrEngine {
 
+    private fun routineDefinition(state: SavedState, id: RoutineId): RoutineDefinition? =
+        Routines.byId(id) ?: state.personalRoutines.firstOrNull { it.id == id }?.definition()
+
+    private fun routineIds(state: SavedState): List<RoutineId> =
+        Routines.all.map { it.id } + state.personalRoutines.map { it.id }
+
     // ------------------------------------------------------------ entry view
 
     /**
@@ -74,6 +80,7 @@ object DhikrEngine {
         }
 
     fun targetFor(entry: RoutineEntry, state: SavedState): Int {
+        if (entry.key.routineId.isPersonal) return entry.target
         if (entry.dhikrId == "la-ilaha-illallah-goal") {
             return laIlaTarget(state.settings)
         }
@@ -91,8 +98,11 @@ object DhikrEngine {
 
     fun entryState(state: SavedState, routine: RoutineDefinition, dayKey: String): List<EntryUiState> {
         val settings = state.settings
+        val personalDhikrs = state.personalRoutines.firstOrNull { it.id == routine.id }
+            ?.entries?.associateBy { it.id }.orEmpty()
         return effectiveEntries(routine, settings).mapIndexed { index, entry ->
             val dhikr = DhikrCatalog.byId(entry.dhikrId)
+                ?: personalDhikrs[entry.dhikrId]?.asDhikr()
                 ?: error("Catalog missing dhikr '${entry.dhikrId}' (entry ${entry.key})")
             val goal = entry.sharedGoalId?.let { goalFor(state, it, dayKey) }
             val goalTarget = goal?.target ?: targetFor(entry, state)
@@ -118,7 +128,7 @@ object DhikrEngine {
     }
 
     fun routineState(state: SavedState, routineId: RoutineId, dayKey: String): RoutineUiState? {
-        val routine = Routines.byId(routineId) ?: return null
+        val routine = routineDefinition(state, routineId) ?: return null
         val language = state.settings.translationLanguage
         return RoutineUiState(
             id = routine.id,
@@ -130,7 +140,7 @@ object DhikrEngine {
     }
 
     fun daySummary(state: SavedState, dayKey: String): DaySummary {
-        val routines = Routines.all.mapNotNull { routineState(state, it.id, dayKey) }
+        val routines = routineIds(state).mapNotNull { routineState(state, it, dayKey) }
         return DaySummary(
             dayKey = dayKey,
             routines = routines,
@@ -166,7 +176,7 @@ object DhikrEngine {
     // -------------------------------------------------------------- mutations
 
     fun increment(state: SavedState, key: RoutineKey, dayKey: String, nowMillis: Long): SavedState {
-        val routine = Routines.byId(key.routineId) ?: return state
+        val routine = routineDefinition(state, key.routineId) ?: return state
         val entry = effectiveEntries(routine, state.settings)
             .firstOrNull { it.key == key } ?: return state
 
@@ -210,7 +220,7 @@ object DhikrEngine {
     }
 
     fun decrement(state: SavedState, key: RoutineKey, dayKey: String): SavedState {
-        val routine = Routines.byId(key.routineId) ?: return state
+        val routine = routineDefinition(state, key.routineId) ?: return state
         val entry = effectiveEntries(routine, state.settings)
             .firstOrNull { it.key == key } ?: return state
 
@@ -245,7 +255,7 @@ object DhikrEngine {
 
     /** "Mark as Recited": fill a one-time recitation entry to its target. */
     fun markRecited(state: SavedState, key: RoutineKey, dayKey: String, nowMillis: Long): SavedState {
-        val routine = Routines.byId(key.routineId) ?: return state
+        val routine = routineDefinition(state, key.routineId) ?: return state
         val entry = effectiveEntries(routine, state.settings)
             .firstOrNull { it.key == key } ?: return state
 
@@ -331,8 +341,8 @@ object DhikrEngine {
     private fun daysWithCompletedRoutine(state: SavedState): Set<String> {
         val dayKeys = state.progress.map { it.dayKey }.toSet() + state.goals.map { it.dayKey }
         return dayKeys.filterTo(HashSet()) { day ->
-            Routines.all.any { routine ->
-                routineState(state, routine.id, day)?.complete == true
+            routineIds(state).any { id ->
+                routineState(state, id, day)?.complete == true
             }
         }
     }
@@ -345,8 +355,8 @@ object DhikrEngine {
     fun resumeCandidate(state: SavedState, dayKey: String): RoutineId? {
         val summary = daySummary(state, dayKey)
         state.lastOpenedRoutine
-            ?.let { last -> summary.routines.firstOrNull { it.id == last && !it.complete } }
+            ?.let { last -> summary.routines.firstOrNull { it.id == last && it.entries.isNotEmpty() && !it.complete } }
             ?.let { return it.id }
-        return summary.routines.firstOrNull { !it.complete }?.id
+        return summary.routines.firstOrNull { it.entries.isNotEmpty() && !it.complete }?.id
     }
 }

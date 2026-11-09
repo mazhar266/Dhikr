@@ -16,11 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Undo
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -28,7 +24,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,7 +57,12 @@ fun ReaderScreen(model: AppModel, routineId: RoutineId, order: Int, modifier: Mo
         return
     }
     val bangla = settings.translationLanguage == TranslationLanguage.BENGALI
-    var showTargetDialog by remember { mutableStateOf(false) }
+    val pronunciation = entry.dhikr.pronunciationFor(settings.translationLanguage)
+    val meaning = entry.dhikr.translationFor(settings.translationLanguage)
+    val hasArabic = entry.dhikr.arabic.isNotBlank()
+    val showPronunciation = pronunciation.isNotBlank() &&
+        (settings.showTransliteration || !hasArabic && (!settings.showTranslation || meaning.isBlank()))
+    val showMeaning = meaning.isNotBlank() && (settings.showTranslation || !hasArabic && !showPronunciation)
 
     val position = entries.indexOfFirst { it.key.order == order }
     val hasPrev = position > 0
@@ -95,25 +95,28 @@ fun ReaderScreen(model: AppModel, routineId: RoutineId, order: Int, modifier: Mo
         ) {
             Spacer(Modifier.height(8.dp))
 
-            Text(
-                entry.dhikr.arabicTitle ?: entry.dhikr.title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center,
-            )
+            if (!routineId.isPersonal) {
+                Text(
+                    entry.dhikr.arabicTitle ?: entry.dhikr.title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(12.dp))
+            }
 
-            Spacer(Modifier.height(12.dp))
+            if (hasArabic) {
+                Text(
+                    entry.dhikr.arabic,
+                    style = arabicTextStyle(settings.arabicFontScale).copy(
+                        textDirection = TextDirection.Content,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    ),
+                    textAlign = TextAlign.Center,
+                )
+            }
 
-            Text(
-                entry.dhikr.arabic,
-                style = arabicTextStyle(settings.arabicFontScale).copy(
-                    textDirection = TextDirection.Content,
-                    color = MaterialTheme.colorScheme.onBackground,
-                ),
-                textAlign = TextAlign.Center,
-            )
-
-            if (settings.showTransliteration) {
+            if (showPronunciation) {
                 Spacer(Modifier.height(16.dp))
                 Text(
                     text.pronunciation,
@@ -122,7 +125,7 @@ fun ReaderScreen(model: AppModel, routineId: RoutineId, order: Int, modifier: Mo
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    entry.dhikr.pronunciationFor(settings.translationLanguage),
+                    pronunciation,
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontStyle = if (bangla) FontStyle.Normal else FontStyle.Italic,
                         fontSize = if (bangla) 18.sp else MaterialTheme.typography.bodyLarge.fontSize,
@@ -133,7 +136,7 @@ fun ReaderScreen(model: AppModel, routineId: RoutineId, order: Int, modifier: Mo
                 )
             }
 
-            if (settings.showTranslation) {
+            if (showMeaning) {
                 Spacer(Modifier.height(12.dp))
                 Text(
                     text.meaning,
@@ -142,7 +145,7 @@ fun ReaderScreen(model: AppModel, routineId: RoutineId, order: Int, modifier: Mo
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    entry.dhikr.translationFor(settings.translationLanguage),
+                    meaning,
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontSize = if (bangla) 18.sp else MaterialTheme.typography.bodyLarge.fontSize,
                         lineHeight = if (bangla) 30.sp else MaterialTheme.typography.bodyLarge.lineHeight,
@@ -180,20 +183,7 @@ fun ReaderScreen(model: AppModel, routineId: RoutineId, order: Int, modifier: Mo
             hasNext = hasNext,
             onPrev = { goTo(-1) },
             onNext = { goTo(1) },
-            onEditTarget = { showTargetDialog = true },
             text = text,
-        )
-    }
-
-    if (showTargetDialog) {
-        TargetDialog(
-            current = entry.target,
-            text = text,
-            onDismiss = { showTargetDialog = false },
-            onSave = { newTarget ->
-                showTargetDialog = false
-                model.setTarget(entry.key, newTarget)
-            },
         )
     }
 }
@@ -206,7 +196,6 @@ private fun Controls(
     hasNext: Boolean,
     onPrev: () -> Unit,
     onNext: () -> Unit,
-    onEditTarget: () -> Unit,
     text: UiText,
 ) {
     val platform = LocalAppPlatform.current
@@ -232,18 +221,11 @@ private fun Controls(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 Text(text.prev)
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (entry.dhikr.id != "la-ilaha-illallah-goal") {
-                    IconButton(onClick = onEditTarget) {
-                        Icon(Icons.Filled.TextFields, contentDescription = text.changeTarget)
-                    }
-                }
-                Text(
-                    text.entryPosition(entry.position),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            Text(
+                text.entryPosition(entry.position),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             OutlinedButton(onClick = onNext, enabled = hasNext) {
                 Text(text.next)
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
@@ -311,38 +293,4 @@ private fun Controls(
         }
         Spacer(Modifier.height(16.dp))
     }
-}
-
-@Composable
-private fun TargetDialog(current: Int, text: UiText, onDismiss: () -> Unit, onSave: (Int) -> Unit) {
-    var value by remember { mutableStateOf(current) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text.repetitionTarget) },
-        text = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                OutlinedButton(
-                    onClick = { if (value > 1) value-- },
-                ) { Icon(Icons.Filled.Remove, contentDescription = text.decrease) }
-                Text(
-                    "$value",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                )
-                OutlinedButton(
-                    onClick = { if (value < 1000) value++ },
-                ) { Icon(Icons.Filled.Add, contentDescription = text.increase) }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onSave(value) }) { Text(text.save) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(text.cancel) }
-        },
-    )
 }

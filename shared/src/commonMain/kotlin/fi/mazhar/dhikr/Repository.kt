@@ -1,6 +1,7 @@
 package fi.mazhar.dhikr
 
 import fi.mazhar.dhikr.content.Routines
+import kotlin.random.Random
 
 /**
  * Facade tying the canonical content, the engine, and a [DhikrStore] together.
@@ -39,8 +40,7 @@ class DhikrRepository(
     fun resumeCandidate(): RoutineId? = DhikrEngine.resumeCandidate(state, todayKey())
 
     fun entriesOf(routineId: RoutineId): List<EntryUiState> {
-        val routine = fi.mazhar.dhikr.content.Routines.byId(routineId) ?: return emptyList()
-        return DhikrEngine.entryState(state, routine, todayKey())
+        return routineState(routineId)?.entries.orEmpty()
     }
 
     // ------------------------------------------------------------ mutations
@@ -57,8 +57,52 @@ class DhikrRepository(
         commit(DhikrEngine.markRecited(state, key, todayKey(), clock.nowMillis()))
     }
 
-    fun setTarget(key: RoutineKey, target: Int) {
-        commit(DhikrEngine.setTarget(state, key, target))
+    fun createPersonalRoutine(title: String): RoutineId? {
+        val name = title.trim()
+        if (name.isEmpty()) return null
+        var id: RoutineId
+        do {
+            id = RoutineId.valueOf("PERSONAL_${Random.nextLong().toULong().toString(16)}")
+        } while (state.personalRoutines.any { it.id == id })
+        commit(state.copy(personalRoutines = state.personalRoutines + PersonalRoutine(id, name)))
+        return id
+    }
+
+    fun renamePersonalRoutine(id: RoutineId, title: String) {
+        val name = title.trim()
+        if (name.isNotEmpty()) updatePersonalRoutine(id) { it.copy(title = name) }
+    }
+
+    fun savePersonalDhikr(id: RoutineId, order: Int?, arabic: String, pronunciation: String, meaning: String, target: Int) {
+        if (target < 1 || listOf(arabic, pronunciation, meaning).all { it.isBlank() }) return
+        updatePersonalRoutine(id) { routine ->
+            if (order != null && routine.entries.none { it.order == order }) return@updatePersonalRoutine routine
+            val entryOrder = order ?: ((routine.entries.maxOfOrNull { it.order } ?: 0) + 1)
+            if (entryOrder <= 0) return@updatePersonalRoutine routine
+            val entry = PersonalDhikr(entryOrder, arabic.trim(), pronunciation.trim(), meaning.trim(), target)
+            val entries = if (order == null) routine.entries + entry
+                else routine.entries.map { if (it.order == order) entry else it }
+            routine.copy(entries = entries)
+        }
+    }
+
+    fun removePersonalDhikr(id: RoutineId, order: Int) {
+        if (!id.isPersonal || state.personalRoutines.none { it.id == id && it.entries.any { entry -> entry.order == order } }) return
+        val key = RoutineKey(id, order)
+        commit(state.copy(
+            personalRoutines = state.personalRoutines.map { routine ->
+                if (routine.id == id) routine.copy(entries = routine.entries.filterNot { it.order == order })
+                else routine
+            },
+            progress = state.progress.filterNot { it.routineKey == key },
+            targetOverrides = state.targetOverrides - key.toString(),
+        ))
+    }
+
+    private fun updatePersonalRoutine(id: RoutineId, transform: (PersonalRoutine) -> PersonalRoutine) {
+        if (!id.isPersonal) return
+        val routines = state.personalRoutines.map { if (it.id == id) transform(it) else it }
+        if (routines != state.personalRoutines) commit(state.copy(personalRoutines = routines))
     }
 
     fun setLastOpened(routineId: RoutineId) {

@@ -20,8 +20,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -35,6 +40,14 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
     val streak = model.streak()
     val platform = LocalAppPlatform.current
     val text = uiText(model.state.settings.translationLanguage)
+    var creatingList by rememberSaveable { mutableStateOf(false) }
+
+    if (creatingList) {
+        PersonalListNameDialog(text, initialName = null, onDismiss = { creatingList = false }) { name ->
+            creatingList = false
+            model.createPersonalRoutine(name)
+        }
+    }
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -138,7 +151,21 @@ fun HomeScreen(model: AppModel, modifier: Modifier = Modifier) {
             }
         }
 
-        items(summary.routines, key = { it.id.name }) { routine ->
+        items(summary.routines.filterNot { it.id.isPersonal }, key = { it.id.name }) { routine ->
+            RoutineCard(routine, text) { model.openRoutine(routine.id) }
+        }
+
+        item {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(text.personalLists, style = MaterialTheme.typography.titleMedium)
+                OutlinedButton(onClick = { creatingList = true }) { Text(text.newPersonalList) }
+            }
+        }
+        items(summary.routines.filter { it.id.isPersonal }, key = { it.id.name }) { routine ->
             RoutineCard(routine, text) { model.openRoutine(routine.id) }
         }
 
@@ -165,13 +192,15 @@ private fun RoutineCard(routine: RoutineUiState, text: UiText, onClick: () -> Un
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
-                Text(
-                    routine.arabicTitle,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        color = MaterialTheme.colorScheme.primary,
-                    ),
-                    modifier = Modifier.padding(vertical = 2.dp),
-                )
+                if (!routine.id.isPersonal) {
+                    Text(
+                        routine.arabicTitle,
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                        ),
+                        modifier = Modifier.padding(vertical = 2.dp),
+                    )
+                }
                 Spacer(Modifier.height(6.dp))
                 LinearProgressIndicator(
                     progress = { routine.percent },

@@ -10,7 +10,6 @@ import fi.mazhar.dhikr.EntryUiState
 import fi.mazhar.dhikr.RoutineId
 import fi.mazhar.dhikr.RoutineKey
 import fi.mazhar.dhikr.SavedState
-import fi.mazhar.dhikr.content.Routines
 
 sealed class Screen {
     data object Home : Screen()
@@ -121,8 +120,22 @@ class AppModel(val repo: DhikrRepository) {
         state = repo.state
     }
 
-    fun setTarget(key: RoutineKey, target: Int) {
-        repo.setTarget(key, target)
+    fun createPersonalRoutine(title: String) {
+        repo.createPersonalRoutine(title)?.let { openRoutine(it) }
+    }
+
+    fun renamePersonalRoutine(id: RoutineId, title: String) {
+        repo.renamePersonalRoutine(id, title)
+        state = repo.state
+    }
+
+    fun savePersonalDhikr(id: RoutineId, order: Int?, arabic: String, pronunciation: String, meaning: String, target: Int) {
+        repo.savePersonalDhikr(id, order, arabic, pronunciation, meaning, target)
+        state = repo.state
+    }
+
+    fun removePersonalDhikr(id: RoutineId, order: Int) {
+        repo.removePersonalDhikr(id, order)
         state = repo.state
     }
 
