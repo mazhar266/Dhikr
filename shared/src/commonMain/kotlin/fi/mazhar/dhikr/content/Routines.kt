@@ -34,9 +34,11 @@ object Routines {
     private fun entry(routine: RoutineId, order: Int, dhikrId: String, target: Int) =
         RoutineEntry(key = fi.mazhar.dhikr.RoutineKey(routine, order), dhikrId = dhikrId, target = target)
 
+    // Entry keys are persisted. New entries use fresh keys regardless of display position.
     private val fajrEntries: List<RoutineEntry> = listOf(
         entry(RoutineId.FAJR, 1, "allahu-akbar", 1),
-        entry(RoutineId.FAJR, 2, "astaghfirullah", 3),
+        entry(RoutineId.FAJR, 2, "astaghfirullah", 2),
+        entry(RoutineId.FAJR, 30, "astaghfirullah-rabbi", 1),
         entry(RoutineId.FAJR, 3, "takbir-tahlil-after-salam", 1),
         entry(RoutineId.FAJR, 4, "antas-salam", 1),
         entry(RoutineId.FAJR, 5, "ajirni-minan-nar", 7),
@@ -56,6 +58,7 @@ object Routines {
         entry(RoutineId.FAJR, 19, "audhu-kalimat-shaytan", 1),
         entry(RoutineId.FAJR, 20, "audhu-kalimat-ghadab", 1),
         entry(RoutineId.FAJR, 21, "bismillah-la-yadurru", 3),
+        entry(RoutineId.FAJR, 31, "subhanallahi-adada-khalqihi", 3),
         entry(RoutineId.FAJR, 22, "sayyidul-istighfar", 1),
         entry(RoutineId.FAJR, 23, "afini-badani", 3),
         entry(RoutineId.FAJR, 24, TAHLIL_ID, 10),

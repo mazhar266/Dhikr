@@ -176,6 +176,24 @@ class EngineTest {
         assertEquals(migrated, repo.state)
     }
 
+    @Test
+    fun oldOpeningIstighfarCountsSurviveTheSplit() {
+        val legacy = SavedState(progress = listOf(
+            DhikrProgress(day, fajrKey(2), "astaghfirullah", 3),
+            DhikrProgress(day, asrKey(2), "astaghfirullah", 2),
+        ))
+        val repo = DhikrRepository(InMemoryDhikrStore(legacy), FixedClock(day))
+        repo.load()
+        assertEquals(2, entryState(repo.state, RoutineId.FAJR, 2).count)
+        assertEquals(1, entryState(repo.state, RoutineId.FAJR, 30).count)
+        assertEquals(2, entryState(repo.state, RoutineId.ASR, 2).count)
+        assertEquals(0, entryState(repo.state, RoutineId.ASR, 30).count)
+        assertEquals(5, DhikrEngine.totalRepetitions(repo.state, day))
+        val migrated = repo.state
+        assertTrue(repo.restore(repo.export()))
+        assertEquals(migrated, repo.state)
+    }
+
     // ------------------------------------------------------------------ day logic
 
     @Test
@@ -185,8 +203,8 @@ class EngineTest {
 
         val today = DhikrEngine.routineState(state, RoutineId.FAJR, day)!!
         val tomorrow = DhikrEngine.routineState(state, RoutineId.FAJR, nextDay)!!
-        assertEquals(1, today.entries[11].count)
-        assertEquals(0, tomorrow.entries[11].count)
+        assertEquals(1, today.entries.single { it.key == fajrKey(12) }.count)
+        assertEquals(0, tomorrow.entries.single { it.key == fajrKey(12) }.count)
 
         // History retained.
         assertEquals(1, state.progress.count { it.dayKey == day })

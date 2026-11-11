@@ -30,7 +30,7 @@ Verse numbering and diacritics are exactly as returned by the dataset; any accid
 | Catalog id | Wording status | Wording source | Count status | Timing status |
 |---|---|---|---|---|
 | `allahu-akbar` | Verified | Standard formula | 1× (opener) user-configured; 33×/34× verified | After prayer: verified (Bukhari 843; Muslim 595–596) |
-| `astaghfirullah` | Verified | Muslim 591 | 3× after salam and 100× in the personal routine | The 100× entry uses the same Astaghfirullah wording |
+| `astaghfirullah` | Verified | Muslim 591 | 2× short wording in Fajr/Asr, followed by the personal longer wording, and 100× later | Muslim 591 reports 3× of the short wording |
 | `takbir-tahlil-after-salam` | Attested wording | Musannaf Ibn Abi Shaybah, Book of the Eid Prayers, chapter on takbir on the Day of Arafah | 1× personal | Daily Fajr/Asr placement is personal |
 | `antas-salam` | Verified | Muslim 592a | Once | After salam |
 | `ajirni-minan-nar` | Reported wording | Abu Dawud 5079, graded da’if by al-Albani | 7× personal | The weak report mentions Fajr and Maghrib. The app uses Fajr and Asr |
@@ -42,6 +42,8 @@ Verse numbering and diacritics are exactly as returned by the dataset; any accid
 | `audhu-kalimat-min-sharri` | Verified | Muslim 2708, 2710 | 3× user-configured | Verified contexts: stopping at a place (Muslim 2708), evening (Muslim 2710); after-prayer use user-configured |
 | `audhu-kalimat-shaytan` | Verified | Bukhari 3371 | 1× personal | The narration describes seeking protection for Al-Hasan and Al-Husain |
 | `audhu-kalimat-ghadab` | Reported wording | Tirmidhi 3528, hasan gharib per at-Tirmidhi and da’if per Darussalam | 1× personal | The narration gives this wording for alarm during sleep |
+| `astaghfirullah-rabbi` | User-provided wording | Personal combination | Once, for the third repetition | Fajr/Asr placement is personal |
+| `subhanallahi-adada-khalqihi` | Verified | Muslim 2726a | 3× | Morning reported in the hadith. Asr placement is personal |
 | `bismillah-la-yadurru` | Verified | Abu Dawud 5088; Tirmidhi 3601 (sahih) | 3× verified | Morning/evening: verified; after-prayer user-configured |
 | `sayyidul-istighfar` | Verified | Bukhari 6306 | 1× verified | Morning/evening: verified; after-prayer user-configured |
 | `afini-badani` | Both supplications attested | Abu Dawud 5090, hasan in chain per al-Albani | 3× each | The report describes morning and evening recitation. One app repetition covers both supplications |
@@ -59,7 +61,7 @@ for the days of Tashriq. The app uses that formula in the personal daily routine
 
 ## Routine-level notes
 
-- **Fajr (29 items) / Asr (27 or 28 items)**. The tahlil setting gives Fajr and Asr
+- **Fajr (31 items) / Asr (29 or 30 items)**. The tahlil setting gives Fajr and Asr
   separate 10× entries, or a single 100× entry in Fajr. Beneficial knowledge is Fajr-only.
 - **Dhuhr / Maghrib / Isha (5 items each)** and **Before Sleep (5 items)**: placements verified as
   noted in the tables above.

@@ -16,7 +16,7 @@ class DhikrRepository(
         private set
 
     fun load() {
-        state = store.load()?.withIndependentTahlilProgress() ?: SavedState()
+        state = store.load()?.withIndependentTahlilProgress()?.withSplitIstighfarProgress() ?: SavedState()
     }
 
     private fun commit(next: SavedState) {
@@ -135,7 +135,7 @@ class DhikrRepository(
     /** Restores from exported text; returns false when the text is not valid state. */
     fun restore(text: String): Boolean {
         val decoded = SavedStateCodec.decode(text) ?: return false
-        commit(decoded.withIndependentTahlilProgress())
+        commit(decoded.withIndependentTahlilProgress().withSplitIstighfarProgress())
         return true
     }
 }
@@ -167,4 +167,24 @@ private fun SavedState.withIndependentTahlilProgress(): SavedState {
         progress = rows.values.toList(),
         goals = goals - legacyGoals.toSet(),
     )
+}
+
+/** Credit the third repetition already recorded by older versions to the new slot. */
+private fun SavedState.withSplitIstighfarProgress(): SavedState {
+    val splitRows = progress.filter {
+        val key = it.routineKey
+        (key.routineId == RoutineId.FAJR || key.routineId == RoutineId.ASR) &&
+            key.order == 2 && it.dhikrId == "astaghfirullah" && it.completedCount >= 3
+    }
+    if (splitRows.isEmpty()) return this
+
+    val rows = progress.associateByTo(linkedMapOf()) { it.dayKey to it.routineKey }
+    for (row in splitRows) {
+        val thirdKey = RoutineKey(row.routineKey.routineId, 30)
+        rows[row.dayKey to row.routineKey] = row.copy(completedCount = 2)
+        rows.getOrPut(row.dayKey to thirdKey) {
+            row.copy(routineKey = thirdKey, dhikrId = "astaghfirullah-rabbi", completedCount = 1)
+        }
+    }
+    return copy(progress = rows.values.toList())
 }

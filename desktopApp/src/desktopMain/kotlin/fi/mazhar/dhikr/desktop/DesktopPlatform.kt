@@ -35,7 +35,7 @@ object DesktopPlatform : AppPlatform {
         null
     }
 
-    override fun version(): String = "1.2.4"
+    override fun version(): String = "1.3.0"
 
     override fun vibrate(strong: Boolean) {
         // No haptics on desktop.

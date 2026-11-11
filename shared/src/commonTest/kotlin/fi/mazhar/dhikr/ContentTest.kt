@@ -15,7 +15,8 @@ class ContentTest {
 
     private val fajrSequence = listOf(
         "allahu-akbar" to 1,
-        "astaghfirullah" to 3,
+        "astaghfirullah" to 2,
+        "astaghfirullah-rabbi" to 1,
         "takbir-tahlil-after-salam" to 1,
         "antas-salam" to 1,
         "ajirni-minan-nar" to 7,
@@ -35,6 +36,7 @@ class ContentTest {
         "audhu-kalimat-shaytan" to 1,
         "audhu-kalimat-ghadab" to 1,
         "bismillah-la-yadurru" to 3,
+        "subhanallahi-adada-khalqihi" to 3,
         "sayyidul-istighfar" to 1,
         "afini-badani" to 3,
         "la-ilaha-illallah-goal" to 10,
@@ -122,19 +124,16 @@ class ContentTest {
         assertEquals(fajrSequence.map { it.first }, fajr.entries.map { it.dhikrId })
         assertEquals(fajrSequence.map { it.second }, fajr.entries.map { it.target })
         assertEquals(1, fajr.entries.first().key.order)
-        assertEquals(fajr.entries.size, fajr.entries.last().key.order)
+        assertEquals(29, fajr.entries.last().key.order)
     }
 
     @Test
     fun asr_matchesInventoryExactly() {
         val asr = Routines.byId(RoutineId.ASR)!!
-        val expected = fajrSequence.take(23) +
-            listOf("la-ilaha-illallah-goal" to 10) +
-            fajrSequence.drop(24).dropLast(1)
-        assertEquals(expected.map { it.first }, asr.entries.map { it.dhikrId })
-        assertEquals(28, asr.entries.size)
-        assertEquals(Routines.byId(RoutineId.FAJR)!!.entries[23].dhikrId, asr.entries[23].dhikrId)
-        assertEquals(RoutineKey(RoutineId.ASR, 24), asr.entries[23].key)
+        val expected = fajrSequence.dropLast(1)
+        assertEquals(expected, asr.entries.map { it.dhikrId to it.target })
+        assertEquals(30, asr.entries.size)
+        assertEquals(RoutineKey(RoutineId.ASR, 24), asr.entries.single { it.dhikrId == Routines.TAHLIL_ID }.key)
     }
 
     @Test
